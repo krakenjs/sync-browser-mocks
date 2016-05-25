@@ -30,20 +30,24 @@ SyncPromise.reject = function(error) {
 SyncPromise.prototype.resolve = function(result) {
     if (this.resolved || this.rejected) {
         return this;
-    };
+    }
+
     this.resolved = true;
     this.value = result;
     this.dispatch();
+
     return this;
 };
 
 SyncPromise.prototype.reject = function(error) {
     if (this.resolved || this.rejected) {
         return this;
-    };
+    }
+
     this.rejected = true;
     this.value = error;
     this.dispatch();
+
     return this;
 };
 
@@ -78,7 +82,7 @@ SyncPromise.prototype.dispatch = function() {
                         err => handler.promise.reject(err));
 
         } else {
-            handler.promise.resolve(result)
+            handler.promise.resolve(result);
         }
     }
 
