@@ -105,7 +105,7 @@ Dynamic handler:
 $mockEndpoint.register({
     method: 'GET',
     uri: '/api/user/.+',
-    data: function() {
+    handler: function() {
         return {
             name: 'Zippy the Pinhead'
         };
