@@ -17,11 +17,13 @@ require('sync-browser-mocks').patchAll();
 
 ### Promise
 
+```javascript
 require('sync-browser-mocks').patchPromise();
+```
 
 No additional changes are needed to use synchronous Promises: as soon as your promise is resolved, rather than waiting for the next tick, your `.then()` and `.catch()` handlers will be immediately invoked.
 
-```
+```javascript
 var x = new Promise(function(resolve) {
     resolve('foobar');
 });
