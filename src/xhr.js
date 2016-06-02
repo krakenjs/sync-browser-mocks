@@ -109,95 +109,98 @@ $mockEndpoint.find = function(method, uri) {
     return match;
 };
 
-export function patchXmlHttpRequest() {
 
-    window.XMLHttpRequest = function() {
+export function SyncXMLHttpRequest() {
 
-    };
+};
 
-    window.XMLHttpRequest.prototype = {
+SyncXMLHttpRequest.prototype = {
 
-        listen: function() {
+    listen: function() {
 
-        },
+    },
 
-        open: function(method, uri) {
-            this.method = method;
-            this.uri = uri;
-            this.mock = $mockEndpoint.find(method, uri);
-            this.params = {};
-            var params = uri.indexOf('?') >= 0 ? uri.substr(uri.indexOf('?') + 1).split('&') : [];
-            params.forEach((param) => {
-                var temp = param.split('=');
-                this.params[decodeURIComponent(temp[0])] = decodeURIComponent(temp[1]);
-            });
+    open: function(method, uri) {
+        this.method = method;
+        this.uri = uri;
+        this.mock = $mockEndpoint.find(method, uri);
+        this.params = {};
+        var params = uri.indexOf('?') >= 0 ? uri.substr(uri.indexOf('?') + 1).split('&') : [];
+        params.forEach((param) => {
+            var temp = param.split('=');
+            this.params[decodeURIComponent(temp[0])] = decodeURIComponent(temp[1]);
+        });
 
-            if (!this.mock) {
-                throw new Error(`Unexpected ${method.toUpperCase()} ${uri}`);
-            }
-        },
-
-        setRequestHeader: function() {
-
-        },
-
-        getResponseHeader: function() {
-
-        },
-
-        getAllResponseHeaders: function() {
-            return 'Content-Type: application/json';
-        },
-
-        send: function(data) {
-
-            if (data) {
-                data = JSON.parse(data);
-            }
-
-            console.debug('REQUEST', this.method, this.uri, data);
-
-            var response = this.mock.call(data, this.params);
-
-            this._respond(this.mock.status, response);
-
-            let callback;
-
-            let descriptor = {
-                get: () => {
-                    return callback;
-                },
-                set: (value) => {
-                    callback = value;
-                    this._respond(this.mock.status, response);
-                }
-            };
-
-            Object.defineProperty(this, 'onreadystatechange', descriptor);
-            Object.defineProperty(this, 'onload', descriptor);
-        },
-
-        _respond(status, response) {
-
-            if (this._responded) {
-                return;
-            }
-
-            let callback = this.onreadystatechange || this.onload;
-
-            if (!callback) {
-                return;
-            }
-
-            this._responded = true;
-
-            console.debug('RESPONSE', status, JSON.stringify(response, 0, 2));
-
-            this.status = status;
-            this.response = this.responseText = JSON.stringify(response);
-            this.readyState = 4;
-
-            callback.call(this);
+        if (!this.mock) {
+            throw new Error(`Unexpected ${method.toUpperCase()} ${uri}`);
         }
-    };
+    },
+
+    setRequestHeader: function() {
+
+    },
+
+    getResponseHeader: function() {
+
+    },
+
+    getAllResponseHeaders: function() {
+        return 'Content-Type: application/json';
+    },
+
+    send: function(data) {
+
+        if (data) {
+            data = JSON.parse(data);
+        }
+
+        console.debug('REQUEST', this.method, this.uri, data);
+
+        var response = this.mock.call(data, this.params);
+
+        this._respond(this.mock.status, response);
+
+        let callback;
+
+        let descriptor = {
+            get: () => {
+                return callback;
+            },
+            set: (value) => {
+                callback = value;
+                this._respond(this.mock.status, response);
+            }
+        };
+
+        Object.defineProperty(this, 'onreadystatechange', descriptor);
+        Object.defineProperty(this, 'onload', descriptor);
+    },
+
+    _respond(status, response) {
+
+        if (this._responded) {
+            return;
+        }
+
+        let callback = this.onreadystatechange || this.onload;
+
+        if (!callback) {
+            return;
+        }
+
+        this._responded = true;
+
+        console.debug('RESPONSE', status, JSON.stringify(response, 0, 2));
+
+        this.status = status;
+        this.response = this.responseText = JSON.stringify(response);
+        this.readyState = 4;
+
+        callback.call(this);
+    }
+};
+
+
+export function patchXmlHttpRequest() {
+    window.XMLHttpRequest = SyncXMLHttpRequest;
 }

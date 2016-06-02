@@ -23,7 +23,7 @@ function findIndex(array, method) {
     }
 }
 
-function syncSetTimeout(method, time) {
+export function syncSetTimeout(method, time) {
 
     time = time || 0;
 
@@ -44,7 +44,7 @@ function syncSetTimeout(method, time) {
     return id;
 }
 
-function syncClearTimeout(id) {
+export function syncClearTimeout(id) {
     if (id === undefined) {
         return;
     }
@@ -76,7 +76,7 @@ let windowSetInterval = window.setInterval;
 let windowClearInterval = window.clearInterval;
 let intervalCount = 0;
 
-function syncSetInterval(method, time) {
+export function syncSetInterval(method, time) {
 
     let id = windowSetInterval(method, time);
 
@@ -92,7 +92,7 @@ function syncSetInterval(method, time) {
     return id;
 }
 
-function syncClearInterval(id) {
+export function syncClearInterval(id) {
     if (id === undefined) {
         return;
     }

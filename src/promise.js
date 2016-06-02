@@ -1,5 +1,5 @@
 
-var SyncPromise = function SyncPromise(handler) {
+export var SyncPromise = function SyncPromise(handler) {
 
     this.resolved = false;
     this.rejected = false;
