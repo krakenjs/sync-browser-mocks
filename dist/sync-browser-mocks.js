@@ -138,8 +138,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 	exports.patchPromise = patchPromise;
-
-	var SyncPromise = function SyncPromise(handler) {
+	var SyncPromise = exports.SyncPromise = function SyncPromise(handler) {
 
 	    this.resolved = false;
 	    this.rejected = false;
@@ -170,20 +169,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	SyncPromise.prototype.resolve = function (result) {
 	    if (this.resolved || this.rejected) {
 	        return this;
-	    };
+	    }
+
 	    this.resolved = true;
 	    this.value = result;
 	    this.dispatch();
+
 	    return this;
 	};
 
 	SyncPromise.prototype.reject = function (error) {
 	    if (this.resolved || this.rejected) {
 	        return this;
-	    };
+	    }
+
 	    this.rejected = true;
 	    this.value = error;
 	    this.dispatch();
+
 	    return this;
 	};
 
@@ -256,6 +259,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.syncSetTimeout = syncSetTimeout;
+	exports.syncClearTimeout = syncClearTimeout;
+	exports.syncSetInterval = syncSetInterval;
+	exports.syncClearInterval = syncClearInterval;
 	exports.patchSetTimeout = patchSetTimeout;
 	exports.patchSetInterval = patchSetInterval;
 
@@ -301,7 +308,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    timeoutTasks.push(task);
 
 	    return id;
-	};
+	}
 
 	function syncClearTimeout(id) {
 	    if (id === undefined) {
@@ -314,7 +321,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return task.id === id;
 	    });
 	    timeoutTasks.splice(index, 1);
-	};
+	}
 
 	syncSetTimeout.flush = function () {
 
@@ -375,7 +382,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        windowClearInterval(task.id);
 	        setInterval(task.method, task.time);
 	    }
-	};
+	}; // eslint-disable-line semi
 
 	function patchSetTimeout() {
 	    window.setTimeout = syncSetTimeout;
@@ -397,6 +404,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 	exports.$mockEndpoint = $mockEndpoint;
+	exports.SyncXMLHttpRequest = SyncXMLHttpRequest;
 	exports.patchXmlHttpRequest = patchXmlHttpRequest;
 
 	var endpoints = [];
@@ -506,92 +514,93 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return match;
 	};
 
-	function patchXmlHttpRequest() {
+	function SyncXMLHttpRequest() {};
 
-	    window.XMLHttpRequest = function () {};
+	SyncXMLHttpRequest.prototype = {
 
-	    window.XMLHttpRequest.prototype = {
+	    listen: function listen() {},
 
-	        listen: function listen() {},
+	    open: function open(method, uri) {
+	        var _this = this;
 
-	        open: function open(method, uri) {
-	            var _this = this;
+	        this.method = method;
+	        this.uri = uri;
+	        this.mock = $mockEndpoint.find(method, uri);
+	        this.params = {};
+	        var params = uri.indexOf('?') >= 0 ? uri.substr(uri.indexOf('?') + 1).split('&') : [];
+	        params.forEach(function (param) {
+	            var temp = param.split('=');
+	            _this.params[decodeURIComponent(temp[0])] = decodeURIComponent(temp[1]);
+	        });
 
-	            this.method = method;
-	            this.uri = uri;
-	            this.mock = $mockEndpoint.find(method, uri);
-	            this.params = {};
-	            var params = uri.indexOf('?') >= 0 ? uri.substr(uri.indexOf('?') + 1).split('&') : [];
-	            params.forEach(function (param) {
-	                var temp = param.split('=');
-	                _this.params[decodeURIComponent(temp[0])] = decodeURIComponent(temp[1]);
-	            });
-
-	            if (!this.mock) {
-	                throw new Error('Unexpected ' + method.toUpperCase() + ' ' + uri);
-	            }
-	        },
-
-	        setRequestHeader: function setRequestHeader() {},
-
-	        getResponseHeader: function getResponseHeader() {},
-
-	        getAllResponseHeaders: function getAllResponseHeaders() {
-	            return 'Content-Type: application/json';
-	        },
-
-	        send: function send(data) {
-	            var _this2 = this;
-
-	            if (data) {
-	                data = JSON.parse(data);
-	            }
-
-	            console.debug('REQUEST', this.method, this.uri, data);
-
-	            var response = this.mock.call(data, this.params);
-
-	            this._respond(this.mock.status, response);
-
-	            var callback = void 0;
-
-	            var descriptor = {
-	                get: function get() {
-	                    return callback;
-	                },
-	                set: function set(value) {
-	                    callback = value;
-	                    _this2._respond(_this2.mock.status, response);
-	                }
-	            };
-
-	            Object.defineProperty(this, 'onreadystatechange', descriptor);
-	            Object.defineProperty(this, 'onload', descriptor);
-	        },
-
-	        _respond: function _respond(status, response) {
-
-	            if (this._responded) {
-	                return;
-	            }
-
-	            var callback = this.onreadystatechange || this.onload;
-
-	            if (!callback) {
-	                return;
-	            }
-
-	            this._responded = true;
-
-	            console.debug('RESPONSE', status, JSON.stringify(response, 0, 2));
-
-	            this.status = status;
-	            this.response = this.responseText = JSON.stringify(response);
-	            this.readyState = 4;
-
-	            callback.call(this);
+	        if (!this.mock) {
+	            throw new Error('Unexpected ' + method.toUpperCase() + ' ' + uri);
 	        }
-	    };
+	    },
+
+	    setRequestHeader: function setRequestHeader() {},
+
+	    getResponseHeader: function getResponseHeader() {},
+
+	    getAllResponseHeaders: function getAllResponseHeaders() {
+	        return 'Content-Type: application/json';
+	    },
+
+	    send: function send(data) {
+	        var _this2 = this;
+
+	        if (data) {
+	            data = JSON.parse(data);
+	        }
+
+	        console.debug('REQUEST', this.method, this.uri, data);
+
+	        var response = this.mock.call(data, this.params);
+
+	        this._respond(this.mock.status, response);
+
+	        var callback = void 0;
+
+	        var descriptor = {
+	            get: function get() {
+	                return callback;
+	            },
+	            set: function set(value) {
+	                callback = value;
+	                _this2._respond(_this2.mock.status, response);
+	            }
+	        };
+
+	        Object.defineProperty(this, 'onreadystatechange', descriptor);
+	        Object.defineProperty(this, 'onload', descriptor);
+	    },
+
+	    _respond: function _respond(status, response) {
+
+	        if (this._responded) {
+	            return;
+	        }
+
+	        var callback = this.onreadystatechange || this.onload;
+
+	        if (!callback) {
+	            return;
+	        }
+
+	        this._responded = true;
+
+	        console.debug('RESPONSE', status, JSON.stringify(response, 0, 2));
+
+	        this.status = status;
+	        this.response = this.responseText = JSON.stringify(response);
+	        this.readyState = 4;
+
+	        callback.call(this);
+	    }
+	};
+
+	function patchXmlHttpRequest() {
+	    window.XMLHttpRequest = SyncXMLHttpRequest;
 	}
 
 /***/ }
