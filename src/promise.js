@@ -127,7 +127,7 @@ SyncPromise.prototype.dispatch = function() {
         }
 
         if (result === this) {
-            throw new Error('Can not return a promise from the the same promise');
+            throw new Error('Can not return a promise from the the then handler of the same promise');
         }
 
         if (error) {
@@ -162,10 +162,14 @@ SyncPromise.prototype.catch = function(onError) {
     return this.then(null, onError);
 };
 
-SyncPromise.prototype.done = function(successHandler, errorHandler) {
-    this.then(successHandler, errorHandler || function(err) {
-            console.error(err.stack || err.toString());
-        });
+SyncPromise.prototype.finally = function(handler) {
+    return this.then(function(result) {
+        handler();
+        return result;
+    }, function(error) {
+        handler();
+        throw error;
+    });
 };
 
 SyncPromise.all = function(promises) {
