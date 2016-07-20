@@ -62,12 +62,21 @@ function flushPossiblyUnhandledPromises() {
 }
 
 function logError(err) {
+
+    return setTimeout(function() {
+        throw err;
+    });
+
+    /*
+
     err = err.stack || err.toString();
     if (window.console && window.console.error) {
         window.console.error(err);
     } else if (window.console && window.console.log) {
         window.console.log(err);
     }
+
+    */
 }
 
 
