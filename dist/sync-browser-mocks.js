@@ -202,12 +202,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function logError(err) {
-	    err = err.stack || err.toString();
+
+	    return setTimeout(function () {
+	        throw err;
+	    });
+
+	    /*
+	     err = err.stack || err.toString();
 	    if (window.console && window.console.error) {
 	        window.console.error(err);
 	    } else if (window.console && window.console.log) {
 	        window.console.log(err);
 	    }
+	     */
 	}
 
 	var SyncPromise = exports.SyncPromise = function SyncPromise(handler, parent) {
