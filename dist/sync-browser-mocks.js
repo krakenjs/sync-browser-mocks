@@ -178,10 +178,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var possiblyUnhandledPromiseTimeout;
 
 	function addPossiblyUnhandledPromise(promise) {
-	    if (!promise.resolved && !promise.hasErrorHandlers) {
-	        possiblyUnhandledPromises.push(promise);
-	        possiblyUnhandledPromiseTimeout = possiblyUnhandledPromiseTimeout || setTimeout(flushPossiblyUnhandledPromises, 1);
-	    }
+	    possiblyUnhandledPromises.push(promise);
+	    possiblyUnhandledPromiseTimeout = possiblyUnhandledPromiseTimeout || setTimeout(flushPossiblyUnhandledPromises, 1);
 	}
 
 	function flushPossiblyUnhandledPromises() {
@@ -190,9 +188,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    possiblyUnhandledPromises = [];
 	    for (var i = 0; i < promises.length; i++) {
 	        var promise = promises[i];
-	        if (!promise.hasErrorHandlers) {
+	        if (!promise.hasHandlers) {
 	            promise.handlers.push({
-	                onError: logError
+	                onError: function onError(err) {
+	                    if (!promise.hasHandlers) {
+	                        logError(err);
+	                    }
+	                }
 	            });
 	            promise.dispatch();
 	        }
@@ -208,13 +210,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 
-	var SyncPromise = exports.SyncPromise = function SyncPromise(handler) {
+	var SyncPromise = exports.SyncPromise = function SyncPromise(handler, parent) {
+
+	    this.parent = parent;
 
 	    this.resolved = false;
 	    this.rejected = false;
 
-	    this.hasErrorHandlers = false;
-	    this.hasSuccessHandlers = false;
+	    this.hasHandlers = false;
 
 	    this.handlers = [];
 
@@ -335,21 +338,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	SyncPromise.prototype.then = function (onSuccess, onError) {
 
-	    var promise = new SyncPromise();
-
-	    if (onSuccess) {
-	        this.hasSuccessHandlers = true;
-	    }
-
-	    if (onError) {
-	        this.hasErrorHandlers = true;
-	    }
+	    var promise = new SyncPromise(null, this);
 
 	    this.handlers.push({
 	        promise: promise,
 	        onSuccess: onSuccess,
 	        onError: onError
 	    });
+
+	    this.hasHandlers = true;
 
 	    this.dispatch();
 
