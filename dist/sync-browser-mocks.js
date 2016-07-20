@@ -174,12 +174,51 @@ return /******/ (function(modules) { // webpackBootstrap
 	    flush();
 	}
 
+	var possiblyUnhandledPromises = [];
+	var possiblyUnhandledPromiseTimeout;
+
+	function addPossiblyUnhandledPromise(promise) {
+	    if (!promise.resolved && !promise.hasErrorHandlers) {
+	        possiblyUnhandledPromises.push(promise);
+	        possiblyUnhandledPromiseTimeout = possiblyUnhandledPromiseTimeout || setTimeout(flushPossiblyUnhandledPromises, 1);
+	    }
+	}
+
+	function flushPossiblyUnhandledPromises() {
+	    possiblyUnhandledPromiseTimeout = null;
+	    var promises = possiblyUnhandledPromises;
+	    possiblyUnhandledPromises = [];
+	    for (var i = 0; i < promises.length; i++) {
+	        var promise = promises[i];
+	        if (!promise.hasErrorHandlers) {
+	            promise.handlers.push({
+	                onError: logError
+	            });
+	            promise.dispatch();
+	        }
+	    }
+	}
+
+	function logError(err) {
+	    err = err.stack || err.toString();
+	    if (window.console && window.console.error) {
+	        window.console.error(err);
+	    } else if (window.console && window.console.log) {
+	        window.console.log(err);
+	    }
+	}
+
 	var SyncPromise = exports.SyncPromise = function SyncPromise(handler) {
 
 	    this.resolved = false;
 	    this.rejected = false;
 
+	    this.hasErrorHandlers = false;
+	    this.hasSuccessHandlers = false;
+
 	    this.handlers = [];
+
+	    addPossiblyUnhandledPromise(this);
 
 	    if (!handler) {
 	        return;
@@ -240,33 +279,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	SyncPromise.prototype.dispatch = function () {
+	    var _this = this;
 
 	    if (!this.resolved && !this.rejected) {
 	        return;
 	    }
 
-	    while (this.handlers.length) {
+	    var _loop = function _loop() {
 
-	        var handler = this.handlers.shift();
-
-	        var result, error;
+	        var handler = _this.handlers.shift();
 
 	        try {
-	            if (this.resolved) {
-	                result = handler.onSuccess ? handler.onSuccess(this.value) : this.value;
+	            if (_this.resolved) {
+	                result = handler.onSuccess ? handler.onSuccess(_this.value) : _this.value;
 	            } else {
 	                if (handler.onError) {
-	                    result = handler.onError(this.value);
+	                    result = handler.onError(_this.value);
 	                } else {
-	                    error = this.value;
+	                    error = _this.value;
 	                }
 	            }
 	        } catch (err) {
 	            error = err;
 	        }
 
-	        if (result === this) {
+	        if (result === _this) {
 	            throw new Error('Can not return a promise from the the then handler of the same promise');
+	        }
+
+	        if (!handler.promise) {
+	            return 'continue';
 	        }
 
 	        if (error) {
@@ -280,12 +322,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else {
 	            handler.promise.resolve(result);
 	        }
+	    };
+
+	    while (this.handlers.length) {
+	        var result, error;
+
+	        var _ret = _loop();
+
+	        if (_ret === 'continue') continue;
 	    }
 	};
 
 	SyncPromise.prototype.then = function (onSuccess, onError) {
 
 	    var promise = new SyncPromise();
+
+	    if (onSuccess) {
+	        this.hasSuccessHandlers = true;
+	    }
+
+	    if (onError) {
+	        this.hasErrorHandlers = true;
+	    }
 
 	    this.handlers.push({
 	        promise: promise,

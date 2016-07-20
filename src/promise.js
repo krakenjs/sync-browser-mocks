@@ -34,13 +34,53 @@ function trycatch(method, successHandler, errorHandler) {
     flush();
 }
 
+var possiblyUnhandledPromises = [];
+var possiblyUnhandledPromiseTimeout;
+
+function addPossiblyUnhandledPromise(promise) {
+    if (!promise.resolved && !promise.hasErrorHandlers) {
+        possiblyUnhandledPromises.push(promise);
+        possiblyUnhandledPromiseTimeout = possiblyUnhandledPromiseTimeout || setTimeout(flushPossiblyUnhandledPromises, 1);
+    }
+}
+
+function flushPossiblyUnhandledPromises() {
+    possiblyUnhandledPromiseTimeout = null;
+    var promises = possiblyUnhandledPromises;
+    possiblyUnhandledPromises = [];
+    for (var i=0; i<promises.length; i++) {
+        var promise = promises[i];
+        if (!promise.hasErrorHandlers) {
+            promise.handlers.push({
+                onError: logError
+            });
+            promise.dispatch();
+        }
+    }
+}
+
+function logError(err) {
+    err = err.stack || err.toString();
+    if (window.console && window.console.error) {
+        window.console.error(err);
+    } else if (window.console && window.console.log) {
+        window.console.log(err);
+    }
+}
+
 
 export var SyncPromise = function SyncPromise(handler) {
 
     this.resolved = false;
     this.rejected = false;
 
+    this.hasErrorHandlers = false;
+    this.hasSuccessHandlers = false;
+
     this.handlers = [];
+
+    addPossiblyUnhandledPromise(this);
+
 
     if (!handler) {
         return;
@@ -108,7 +148,7 @@ SyncPromise.prototype.dispatch = function() {
 
     while (this.handlers.length) {
 
-        var handler = this.handlers.shift();
+        let handler = this.handlers.shift();
 
         var result, error;
 
@@ -130,6 +170,10 @@ SyncPromise.prototype.dispatch = function() {
             throw new Error('Can not return a promise from the the then handler of the same promise');
         }
 
+        if (!handler.promise) {
+            continue;
+        }
+
         if (error) {
             handler.promise.reject(error);
 
@@ -146,6 +190,14 @@ SyncPromise.prototype.dispatch = function() {
 SyncPromise.prototype.then = function(onSuccess, onError) {
 
     var promise = new SyncPromise();
+
+    if (onSuccess) {
+        this.hasSuccessHandlers = true;
+    }
+
+    if (onError) {
+        this.hasErrorHandlers = true;
+    }
 
     this.handlers.push({
         promise: promise,
