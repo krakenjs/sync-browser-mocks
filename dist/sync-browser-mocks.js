@@ -202,19 +202,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function logError(err) {
-
-	    return setTimeout(function () {
+	    setTimeout(function () {
 	        throw err;
 	    });
+	}
 
-	    /*
-	     err = err.stack || err.toString();
-	    if (window.console && window.console.error) {
-	        window.console.error(err);
-	    } else if (window.console && window.console.log) {
-	        window.console.log(err);
+	function isPromise(item) {
+	    try {
+	        if (item && item.then instanceof Function) {
+	            return true;
+	        }
+	    } catch (err) {
+	        return false;
 	    }
-	     */
+
+	    return false;
 	}
 
 	var SyncPromise = exports.SyncPromise = function SyncPromise(handler, parent) {
@@ -245,7 +247,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	SyncPromise.resolve = function SyncPromiseResolve(value) {
 
-	    if (value && value.then) {
+	    if (isPromise(value)) {
 	        return value;
 	    }
 
@@ -261,7 +263,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return this;
 	    }
 
-	    if (result && result.then) {
+	    if (isPromise(result)) {
 	        throw new Error('Can not resolve promise with another promise');
 	    }
 
@@ -277,7 +279,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return this;
 	    }
 
-	    if (error && error.then) {
+	    if (isPromise(error)) {
 	        throw new Error('Can not reject promise with another promise');
 	    }
 
@@ -323,7 +325,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (error) {
 	            handler.promise.reject(error);
-	        } else if (result && result.then) {
+	        } else if (isPromise(result)) {
 	            result.then(function (res) {
 	                handler.promise.resolve(res);
 	            }, function (err) {
