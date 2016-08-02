@@ -188,15 +188,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    possiblyUnhandledPromises = [];
 	    for (var i = 0; i < promises.length; i++) {
 	        var promise = promises[i];
-	        if (!promise.hasHandlers) {
-	            promise.handlers.push({
-	                onError: function onError(err) {
-	                    if (!promise.hasHandlers) {
-	                        logError(err);
-	                    }
-	                }
-	            });
-	            promise.dispatch();
+	        if (!promise.hasHandlers && promise.rejected) {
+	            logError(promise.value);
 	        }
 	    }
 	}
@@ -209,6 +202,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function isPromise(item) {
 	    try {
+	        if (window.Window && item instanceof window.Window) {
+	            return false;
+	        }
+
+	        if (window.constructor && item instanceof window.constructor) {
+	            return false;
+	        }
+
+	        if (window.toString) {
+	            var name = toString.call(item);
+
+	            if (name === '[object Window]' || name === '[object global]' || name === '[object DOMWindow]') {
+	                return false;
+	            }
+	        }
+
 	        if (item && item.then instanceof Function) {
 	            return true;
 	        }
