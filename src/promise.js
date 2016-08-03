@@ -57,7 +57,7 @@ function flushPossiblyUnhandledPromises() {
 function logError(err) {
     setTimeout(() => {
         throw err;
-    });
+    }, 1);
 }
 
 
