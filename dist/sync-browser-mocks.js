@@ -197,11 +197,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	function logError(err) {
 	    setTimeout(function () {
 	        throw err;
-	    });
+	    }, 1);
 	}
+
+	var toString = {}.toString;
 
 	function isPromise(item) {
 	    try {
+	        if (!item) {
+	            return false;
+	        }
+
 	        if (window.Window && item instanceof window.Window) {
 	            return false;
 	        }
@@ -210,7 +216,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return false;
 	        }
 
-	        if (window.toString) {
+	        if (toString) {
 	            var name = toString.call(item);
 
 	            if (name === '[object Window]' || name === '[object global]' || name === '[object DOMWindow]') {
