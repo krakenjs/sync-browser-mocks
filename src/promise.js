@@ -61,8 +61,14 @@ function logError(err) {
 }
 
 
+let toString = ({}).toString;
+
 function isPromise(item) {
     try {
+        if (!item) {
+            return false;
+        }
+
         if (window.Window && item instanceof window.Window) {
             return false;
         }
@@ -71,7 +77,7 @@ function isPromise(item) {
             return false;
         }
 
-        if (window.toString) {
+        if (toString) {
             let name = toString.call(item);
 
             if (name === '[object Window]' || name === '[object global]' || name === '[object DOMWindow]') {
