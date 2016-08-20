@@ -174,6 +174,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    flush();
 	}
 
+	var possiblyUnhandledPromiseHandlers = [];
 	var possiblyUnhandledPromises = [];
 	var possiblyUnhandledPromiseTimeout;
 
@@ -190,6 +191,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var promise = promises[i];
 	        if (!promise.hasHandlers && promise.rejected) {
 	            logError(promise.value);
+	            for (var j = 0; j < possiblyUnhandledPromiseHandlers.length; j++) {
+	                possiblyUnhandledPromiseHandlers[j](promise.value);
+	            }
 	        }
 	    }
 	}
@@ -410,6 +414,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    return promise;
+	};
+
+	SyncPromise.onPossiblyUnhandledException = function (handler) {
+	    possiblyUnhandledPromiseHandlers.push(handler);
 	};
 
 	function patchPromise() {
