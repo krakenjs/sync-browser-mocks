@@ -34,6 +34,7 @@ function trycatch(method, successHandler, errorHandler) {
     flush();
 }
 
+var possiblyUnhandledPromiseHandlers = [];
 var possiblyUnhandledPromises = [];
 var possiblyUnhandledPromiseTimeout;
 
@@ -50,6 +51,9 @@ function flushPossiblyUnhandledPromises() {
         var promise = promises[i];
         if (!promise.hasHandlers && promise.rejected) {
             logError(promise.value);
+            for (var j=0; j<possiblyUnhandledPromiseHandlers.length; j++) {
+                possiblyUnhandledPromiseHandlers[j](promise.value);
+            }
         }
     }
 }
@@ -263,6 +267,10 @@ SyncPromise.all = function(promises) {
     }
 
     return promise;
+};
+
+SyncPromise.onPossiblyUnhandledException = function(handler) {
+    possiblyUnhandledPromiseHandlers.push(handler);
 };
 
 
