@@ -189,11 +189,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    possiblyUnhandledPromises = [];
 	    for (var i = 0; i < promises.length; i++) {
 	        var promise = promises[i];
-	        if (!promise.hasHandlers && promise.rejected) {
-	            logError(promise.value);
-	            for (var j = 0; j < possiblyUnhandledPromiseHandlers.length; j++) {
-	                possiblyUnhandledPromiseHandlers[j](promise.value);
-	            }
+
+	        if (!promise.hasHandlers) {
+	            promise.handlers.push({
+	                onError: function onError(err) {
+	                    if (!promise.hasHandlers) {
+	                        logError(err);
+
+	                        for (var j = 0; j < possiblyUnhandledPromiseHandlers.length; j++) {
+	                            possiblyUnhandledPromiseHandlers[j](promise.value);
+	                        }
+	                    }
+	                }
+	            });
+
+	            promise.dispatch();
 	        }
 	    }
 	}
