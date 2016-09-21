@@ -266,7 +266,7 @@ SyncPromise.all = function(promises) {
 
     for (var i = 0; i < promises.length; i++) {
 
-        let prom = isPromise(promises[i]) ? promises[i] : Promise.resolve(promises[i]);
+        let prom = isPromise(promises[i]) ? promises[i] : SyncPromise.resolve(promises[i]);
 
         prom.then(function(result) {
             results[i] = result;
