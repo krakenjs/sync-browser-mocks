@@ -413,7 +413,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    for (var i = 0; i < promises.length; i++) {
 
-	        var prom = isPromise(promises[i]) ? promises[i] : Promise.resolve(promises[i]);
+	        var prom = isPromise(promises[i]) ? promises[i] : SyncPromise.resolve(promises[i]);
 
 	        prom.then(function (result) {
 	            results[i] = result;
