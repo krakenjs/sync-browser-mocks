@@ -248,9 +248,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return false;
 	}
 
-	var SyncPromise = exports.SyncPromise = function SyncPromise(handler, parent) {
-
-	    this.parent = parent;
+	var SyncPromise = exports.SyncPromise = function SyncPromise(handler) {
 
 	    this.resolved = false;
 	    this.rejected = false;
@@ -411,7 +409,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var count = promises.length;
 	    var results = [];
 
-	    for (var i = 0; i < promises.length; i++) {
+	    var _loop2 = function _loop2(i) {
 
 	        var prom = isPromise(promises[i]) ? promises[i] : SyncPromise.resolve(promises[i]);
 
@@ -424,6 +422,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, function (err) {
 	            promise.reject(err);
 	        });
+	    };
+
+	    for (var i = 0; i < promises.length; i++) {
+	        _loop2(i);
 	    }
 
 	    return promise;
