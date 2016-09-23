@@ -109,9 +109,7 @@ function isPromise(item) {
     return false
 }
 
-export var SyncPromise = function SyncPromise(handler, parent) {
-
-    this.parent = parent;
+export var SyncPromise = function SyncPromise(handler) {
 
     this.resolved = false;
     this.rejected = false;
