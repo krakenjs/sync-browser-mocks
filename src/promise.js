@@ -262,7 +262,7 @@ SyncPromise.all = function(promises) {
     var count = promises.length;
     var results = [];
 
-    for (var i = 0; i < promises.length; i++) {
+    for (let i = 0; i < promises.length; i++) {
 
         let prom = isPromise(promises[i]) ? promises[i] : SyncPromise.resolve(promises[i]);
 
