@@ -208,7 +208,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 
+	var loggedErrors = [];
+
 	function logError(err) {
+
+	    if (loggedErrors.indexOf(err) !== -1) {
+	        return;
+	    }
+
+	    loggedErrors.push(err);
+
 	    setTimeout(function () {
 	        throw err;
 	    }, 1);
