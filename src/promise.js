@@ -68,7 +68,16 @@ function flushPossiblyUnhandledPromises() {
     }
 }
 
+let loggedErrors = [];
+
 function logError(err) {
+
+    if (loggedErrors.indexOf(err) !== -1) {
+        return;
+    }
+
+    loggedErrors.push(err);
+
     setTimeout(() => {
         throw err;
     }, 1);
