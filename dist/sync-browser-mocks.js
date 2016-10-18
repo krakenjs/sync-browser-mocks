@@ -444,6 +444,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    possiblyUnhandledPromiseHandlers.push(handler);
 	};
 
+	SyncPromise['try'] = function (method) {
+	    return SyncPromise.resolve().then(method);
+	};
+
 	function patchPromise() {
 	    window.Promise = SyncPromise;
 	}
