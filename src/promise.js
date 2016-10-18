@@ -293,6 +293,10 @@ SyncPromise.onPossiblyUnhandledException = function(handler) {
     possiblyUnhandledPromiseHandlers.push(handler);
 };
 
+SyncPromise.try = function(method) {
+    return SyncPromise.resolve().then(method);
+}
+
 
 export function patchPromise() {
     window.Promise = SyncPromise;
