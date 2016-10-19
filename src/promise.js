@@ -293,12 +293,18 @@ SyncPromise.all = function(promises) {
     return promise;
 };
 
-SyncPromise.onPossiblyUnhandledException = function(handler) {
+SyncPromise.onPossiblyUnhandledException = function syncPromiseOnPossiblyUnhandledException(handler) {
     possiblyUnhandledPromiseHandlers.push(handler);
 };
 
-SyncPromise.try = function(method) {
+SyncPromise.try = function syncPromiseTry(method) {
     return SyncPromise.resolve().then(method);
+}
+
+SyncPromise.delay = function syncPromiseDelay(delay) {
+    return new SyncPromise(resolve => {
+        setTimeout(resolve, delay);
+    });
 }
 
 
