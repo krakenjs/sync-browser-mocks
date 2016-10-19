@@ -286,6 +286,10 @@ SyncPromise.all = function(promises) {
         });
     }
 
+    if (!results.length) {
+        promise.resolve(results);
+    }
+
     return promise;
 };
 
