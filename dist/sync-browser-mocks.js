@@ -437,6 +437,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _loop2(i);
 	    }
 
+	    if (!results.length) {
+	        promise.resolve(results);
+	    }
+
 	    return promise;
 	};
 
