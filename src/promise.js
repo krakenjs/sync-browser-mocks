@@ -286,7 +286,7 @@ SyncPromise.all = function(promises) {
         });
     }
 
-    if (!results.length) {
+    if (!count) {
         promise.resolve(results);
     }
 
