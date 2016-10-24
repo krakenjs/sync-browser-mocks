@@ -226,7 +226,7 @@ SyncPromise.prototype.dispatch = function() {
 
         } else if (isPromise(result)) {
             result.then(res => { handler.promise.resolve(res); },
-                    err => { handler.promise.reject(err); });
+                        err => { handler.promise.reject(err);  });
 
         } else {
             handler.promise.resolve(result);
@@ -257,11 +257,15 @@ SyncPromise.prototype.catch = function(onError) {
 
 SyncPromise.prototype.finally = function(handler) {
     return this.then(function(result) {
-        handler();
-        return result;
+        return SyncPromise.try(handler)
+            .then(() => {
+                return result;
+            });
     }, function(error) {
-        handler();
-        throw error;
+        return SyncPromise.try(handler)
+            .then(() => {
+                throw err;
+            });
     });
 };
 
