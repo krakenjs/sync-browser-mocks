@@ -404,11 +404,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	SyncPromise.prototype['finally'] = function (handler) {
 	    return this.then(function (result) {
-	        handler();
-	        return result;
+	        return SyncPromise['try'](handler).then(function () {
+	            return result;
+	        });
 	    }, function (error) {
-	        handler();
-	        throw error;
+	        return SyncPromise['try'](handler).then(function () {
+	            throw err;
+	        });
 	    });
 	};
 
