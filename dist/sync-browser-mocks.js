@@ -383,6 +383,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	SyncPromise.prototype.then = function (onSuccess, onError) {
 
+	    if (onSuccess && typeof onSuccess !== 'function') {
+	        throw new Error('Promise.then expected a function for success handler');
+	    }
+
+	    if (onError && typeof onError !== 'function') {
+	        throw new Error('Promise.then expected a function for error handler');
+	    }
+
 	    var promise = new SyncPromise(null, this);
 
 	    this.handlers.push({
@@ -457,6 +465,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	SyncPromise.delay = function syncPromiseDelay(delay) {
 	    return new SyncPromise(function (resolve) {
 	        setTimeout(resolve, delay);
+	    });
+	};
+
+	SyncPromise.hash = function (obj) {
+
+	    var results = {};
+	    var promises = [];
+
+	    for (var key in obj) {
+	        if (obj.hasOwnProperty(key)) {
+	            promises.push(SyncPromise.resolve(obj[key]).then(function (result) {
+	                results[key] = result;
+	            }));
+	        }
+	    }
+
+	    return Promise.all(promises).then(function () {
+	        return results;
 	    });
 	};
 
