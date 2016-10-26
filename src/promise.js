@@ -319,6 +319,24 @@ SyncPromise.delay = function syncPromiseDelay(delay) {
     });
 }
 
+SyncPromise.hash = function(obj) {
+
+    let results = {};
+    let promises = [];
+
+    for (var key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            promises.push(SyncPromise.resolve(obj[key]).then(result => {
+                results[key] = result;
+            }));
+        }
+    }
+
+    return Promise.all(promises).then(() => {
+        return results;
+    });
+}
+
 
 export function patchPromise() {
     window.Promise = SyncPromise;
