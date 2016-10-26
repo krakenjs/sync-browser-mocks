@@ -236,6 +236,14 @@ SyncPromise.prototype.dispatch = function() {
 
 SyncPromise.prototype.then = function(onSuccess, onError) {
 
+    if (onSuccess && typeof onSuccess !== 'function') {
+        throw new Error('Promise.then expected a function for success handler');
+    }
+
+    if (onError && typeof onError !== 'function') {
+        throw new Error('Promise.then expected a function for error handler');
+    }
+
     var promise = new SyncPromise(null, this);
 
     this.handlers.push({
