@@ -481,7 +481,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 
-	    return Promise.all(promises).then(function () {
+	    return SyncPromise.all(promises).then(function () {
 	        return results;
 	    });
 	};
