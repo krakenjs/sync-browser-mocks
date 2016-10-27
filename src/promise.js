@@ -332,7 +332,7 @@ SyncPromise.hash = function(obj) {
         }
     }
 
-    return Promise.all(promises).then(() => {
+    return SyncPromise.all(promises).then(() => {
         return results;
     });
 }
