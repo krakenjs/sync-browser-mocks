@@ -269,7 +269,7 @@ SyncPromise.prototype.finally = function(handler) {
             .then(() => {
                 return result;
             });
-    }, function(error) {
+    }, function(err) {
         return SyncPromise.try(handler)
             .then(() => {
                 throw err;
