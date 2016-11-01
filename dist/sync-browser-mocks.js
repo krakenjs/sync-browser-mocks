@@ -415,7 +415,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return SyncPromise['try'](handler).then(function () {
 	            return result;
 	        });
-	    }, function (error) {
+	    }, function (err) {
 	        return SyncPromise['try'](handler).then(function () {
 	            throw err;
 	        });
