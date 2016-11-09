@@ -187,6 +187,11 @@ SyncPromise.prototype.reject = function(error) {
     return this;
 };
 
+SyncPromise.prototype.asyncReject = function(error) {
+    this.hasHandlers = true;
+    return this.reject(error);
+}
+
 SyncPromise.prototype.dispatch = function() {
 
     if (!this.resolved && !this.rejected) {
