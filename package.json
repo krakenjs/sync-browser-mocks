@@ -1,6 +1,6 @@
 {
   "name": "sync-browser-mocks",
-  "version": "1.0.28",
+  "version": "1.0.29",
   "description": "Synchronous browser mock shims.",
   "main": "index.js",
   "scripts": {
