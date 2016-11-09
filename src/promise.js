@@ -241,11 +241,11 @@ SyncPromise.prototype.dispatch = function() {
 
 SyncPromise.prototype.then = function(onSuccess, onError) {
 
-    if (onSuccess && typeof onSuccess !== 'function') {
+    if (onSuccess && typeof onSuccess !== 'function' && !onSuccess.call) {
         throw new Error('Promise.then expected a function for success handler');
     }
 
-    if (onError && typeof onError !== 'function') {
+    if (onError && typeof onError !== 'function' && !onError.call) {
         throw new Error('Promise.then expected a function for error handler');
     }
 
