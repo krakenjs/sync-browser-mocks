@@ -144,7 +144,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var isCalled = false;
 	    var isSuccess = false;
 	    var isError = false;
-	    var err, res;
+	    var err = void 0,
+	        res = void 0;
 
 	    function flush() {
 	        if (isCalled) {
@@ -176,7 +177,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var possiblyUnhandledPromiseHandlers = [];
 	var possiblyUnhandledPromises = [];
-	var possiblyUnhandledPromiseTimeout;
+	var possiblyUnhandledPromiseTimeout = void 0;
 
 	function addPossiblyUnhandledPromise(promise) {
 	    possiblyUnhandledPromises.push(promise);
@@ -187,7 +188,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    possiblyUnhandledPromiseTimeout = null;
 	    var promises = possiblyUnhandledPromises;
 	    possiblyUnhandledPromises = [];
-	    for (var i = 0; i < promises.length; i++) {
+
+	    var _loop = function _loop(i) {
 	        var promise = promises[i];
 
 	        if (!promise.hasHandlers) {
@@ -205,6 +207,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            promise.dispatch();
 	        }
+	    };
+
+	    for (var i = 0; i < promises.length; i++) {
+	        _loop(i);
 	    }
 	}
 
@@ -338,9 +344,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	    }
 
-	    var _loop = function _loop() {
+	    var _loop2 = function _loop2() {
 
 	        var handler = _this.handlers.shift();
+
+	        var result = void 0,
+	            error = void 0;
 
 	        try {
 	            if (_this.resolved) {
@@ -378,11 +387,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 
 	    while (this.handlers.length) {
-	        var result, error;
+	        var _ret2 = _loop2();
 
-	        var _ret = _loop();
-
-	        if (_ret === 'continue') continue;
+	        if (_ret2 === 'continue') continue;
 	    }
 	};
 
@@ -433,7 +440,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var count = promises.length;
 	    var results = [];
 
-	    var _loop2 = function _loop2(i) {
+	    var _loop3 = function _loop3(i) {
 
 	        var prom = isPromise(promises[i]) ? promises[i] : SyncPromise.resolve(promises[i]);
 
@@ -449,7 +456,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 
 	    for (var i = 0; i < promises.length; i++) {
-	        _loop2(i);
+	        _loop3(i);
 	    }
 
 	    if (!count) {
@@ -478,12 +485,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var results = {};
 	    var promises = [];
 
-	    for (var key in obj) {
+	    var _loop4 = function _loop4(key) {
 	        if (obj.hasOwnProperty(key)) {
 	            promises.push(SyncPromise.resolve(obj[key]).then(function (result) {
 	                results[key] = result;
 	            }));
 	        }
+	    };
+
+	    for (var key in obj) {
+	        _loop4(key);
 	    }
 
 	    return SyncPromise.all(promises).then(function () {
