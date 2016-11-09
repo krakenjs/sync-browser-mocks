@@ -326,6 +326,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return this;
 	};
 
+	SyncPromise.prototype.asyncReject = function (error) {
+	    this.hasHandlers = true;
+	    return this.reject(error);
+	};
+
 	SyncPromise.prototype.dispatch = function () {
 	    var _this = this;
 
@@ -383,11 +388,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	SyncPromise.prototype.then = function (onSuccess, onError) {
 
-	    if (onSuccess && typeof onSuccess !== 'function') {
+	    if (onSuccess && typeof onSuccess !== 'function' && !onSuccess.call) {
 	        throw new Error('Promise.then expected a function for success handler');
 	    }
 
-	    if (onError && typeof onError !== 'function') {
+	    if (onError && typeof onError !== 'function' && !onError.call) {
 	        throw new Error('Promise.then expected a function for error handler');
 	    }
 
