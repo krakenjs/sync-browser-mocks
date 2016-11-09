@@ -1,10 +1,10 @@
 
 function trycatch(method, successHandler, errorHandler) {
 
-    var isCalled = false;
-    var isSuccess = false;
-    var isError = false;
-    var err, res;
+    let isCalled = false;
+    let isSuccess = false;
+    let isError = false;
+    let err, res;
 
     function flush() {
         if (isCalled) {
@@ -34,9 +34,9 @@ function trycatch(method, successHandler, errorHandler) {
     flush();
 }
 
-var possiblyUnhandledPromiseHandlers = [];
-var possiblyUnhandledPromises = [];
-var possiblyUnhandledPromiseTimeout;
+let possiblyUnhandledPromiseHandlers = [];
+let possiblyUnhandledPromises = [];
+let possiblyUnhandledPromiseTimeout;
 
 function addPossiblyUnhandledPromise(promise) {
     possiblyUnhandledPromises.push(promise);
@@ -45,10 +45,10 @@ function addPossiblyUnhandledPromise(promise) {
 
 function flushPossiblyUnhandledPromises() {
     possiblyUnhandledPromiseTimeout = null;
-    var promises = possiblyUnhandledPromises;
+    let promises = possiblyUnhandledPromises;
     possiblyUnhandledPromises = [];
-    for (var i=0; i<promises.length; i++) {
-        var promise = promises[i];
+    for (let i=0; i<promises.length; i++) {
+        let promise = promises[i];
 
         if (!promise.hasHandlers) {
             promise.handlers.push({
@@ -56,7 +56,7 @@ function flushPossiblyUnhandledPromises() {
                     if (!promise.hasHandlers) {
                         logError(err);
 
-                        for (var j=0; j<possiblyUnhandledPromiseHandlers.length; j++) {
+                        for (let j=0; j<possiblyUnhandledPromiseHandlers.length; j++) {
                             possiblyUnhandledPromiseHandlers[j](promise.value);
                         }
                     }
@@ -118,7 +118,7 @@ function isPromise(item) {
     return false
 }
 
-export var SyncPromise = function SyncPromise(handler) {
+export let SyncPromise = function SyncPromise(handler) {
 
     this.resolved = false;
     this.rejected = false;
@@ -133,7 +133,7 @@ export var SyncPromise = function SyncPromise(handler) {
         return;
     }
 
-    var self = this;
+    let self = this;
 
     trycatch(handler, function(res) {
         return self.resolve(res);
@@ -202,7 +202,7 @@ SyncPromise.prototype.dispatch = function() {
 
         let handler = this.handlers.shift();
 
-        var result, error;
+        let result, error;
 
         try {
             if (this.resolved) {
@@ -249,7 +249,7 @@ SyncPromise.prototype.then = function(onSuccess, onError) {
         throw new Error('Promise.then expected a function for error handler');
     }
 
-    var promise = new SyncPromise(null, this);
+    let promise = new SyncPromise(null, this);
 
     this.handlers.push({
         promise: promise,
@@ -284,9 +284,9 @@ SyncPromise.prototype.finally = function(handler) {
 
 SyncPromise.all = function(promises) {
 
-    var promise = new SyncPromise();
-    var count = promises.length;
-    var results = [];
+    let promise = new SyncPromise();
+    let count = promises.length;
+    let results = [];
 
     for (let i = 0; i < promises.length; i++) {
 
@@ -329,7 +329,7 @@ SyncPromise.hash = function(obj) {
     let results = {};
     let promises = [];
 
-    for (var key in obj) {
+    for (let key in obj) {
         if (obj.hasOwnProperty(key)) {
             promises.push(SyncPromise.resolve(obj[key]).then(result => {
                 results[key] = result;
