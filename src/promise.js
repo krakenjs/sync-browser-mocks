@@ -44,43 +44,49 @@ function addPossiblyUnhandledPromise(promise) {
 }
 
 function flushPossiblyUnhandledPromises() {
+
     possiblyUnhandledPromiseTimeout = null;
     let promises = possiblyUnhandledPromises;
     possiblyUnhandledPromises = [];
-    for (let i=0; i<promises.length; i++) {
+
+    for (let i = 0; i < promises.length; i++) {
         let promise = promises[i];
 
-        if (!promise.hasHandlers) {
-            promise.handlers.push({
-                onError(err) {
-                    if (!promise.hasHandlers) {
-                        logError(err);
-
-                        for (let j=0; j<possiblyUnhandledPromiseHandlers.length; j++) {
-                            possiblyUnhandledPromiseHandlers[j](promise.value);
-                        }
-                    }
-                }
-            });
-
-            promise.dispatch();
+        if (promise.silentReject) {
+            continue;
         }
+
+        promise.handlers.push({
+            onError(err) {
+                if (promise.silentReject) {
+                    return;
+                }
+
+                dispatchError(err);
+            }
+        });
+
+        promise.dispatch();
     }
 }
 
-let loggedErrors = [];
+let dispatchedErrors = [];
 
-function logError(err) {
+function dispatchError(err) {
 
-    if (loggedErrors.indexOf(err) !== -1) {
+    if (dispatchedErrors.indexOf(err) !== -1) {
         return;
     }
 
-    loggedErrors.push(err);
+    dispatchedErrors.push(err);
 
     setTimeout(() => {
         throw err;
     }, 1);
+
+    for (let j = 0; j < possiblyUnhandledPromiseHandlers.length; j++) {
+        possiblyUnhandledPromiseHandlers[j](promise.value);
+    }
 }
 
 
@@ -123,7 +129,7 @@ export let SyncPromise = function SyncPromise(handler) {
     this.resolved = false;
     this.rejected = false;
 
-    this.hasHandlers = false;
+    this.silentReject = false;
 
     this.handlers = [];
 
@@ -188,7 +194,7 @@ SyncPromise.prototype.reject = function(error) {
 };
 
 SyncPromise.prototype.asyncReject = function(error) {
-    this.hasHandlers = true;
+    this.silentReject = true;
     return this.reject(error);
 }
 
@@ -211,6 +217,11 @@ SyncPromise.prototype.dispatch = function() {
                 if (handler.onError) {
                     result = handler.onError(this.value);
                 } else {
+
+                    if (handler.promise && this.silentReject) {
+                        handler.promise.silentReject = true;
+                    }
+
                     error = this.value;
                 }
             }
@@ -257,7 +268,7 @@ SyncPromise.prototype.then = function(onSuccess, onError) {
         onError: onError
     });
 
-    this.hasHandlers = true;
+    this.silentReject = true;
 
     this.dispatch();
 
@@ -299,6 +310,11 @@ SyncPromise.all = function(promises) {
                 promise.resolve(results);
             }
         }, function(err) {
+
+            if (prom.silentReject) {
+                promise.silentReject = true;
+            }
+
             promise.reject(err);
         });
     }
