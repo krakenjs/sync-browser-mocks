@@ -185,6 +185,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function flushPossiblyUnhandledPromises() {
+
 	    possiblyUnhandledPromiseTimeout = null;
 	    var promises = possiblyUnhandledPromises;
 	    possiblyUnhandledPromises = [];
@@ -192,41 +193,47 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _loop = function _loop(i) {
 	        var promise = promises[i];
 
-	        if (!promise.hasHandlers) {
-	            promise.handlers.push({
-	                onError: function onError(err) {
-	                    if (!promise.hasHandlers) {
-	                        logError(err);
-
-	                        for (var j = 0; j < possiblyUnhandledPromiseHandlers.length; j++) {
-	                            possiblyUnhandledPromiseHandlers[j](promise.value);
-	                        }
-	                    }
-	                }
-	            });
-
-	            promise.dispatch();
+	        if (promise.silentReject) {
+	            return 'continue';
 	        }
+
+	        promise.handlers.push({
+	            onError: function onError(err) {
+	                if (promise.silentReject) {
+	                    return;
+	                }
+
+	                dispatchError(err);
+	            }
+	        });
+
+	        promise.dispatch();
 	    };
 
 	    for (var i = 0; i < promises.length; i++) {
-	        _loop(i);
+	        var _ret = _loop(i);
+
+	        if (_ret === 'continue') continue;
 	    }
 	}
 
-	var loggedErrors = [];
+	var dispatchedErrors = [];
 
-	function logError(err) {
+	function dispatchError(err) {
 
-	    if (loggedErrors.indexOf(err) !== -1) {
+	    if (dispatchedErrors.indexOf(err) !== -1) {
 	        return;
 	    }
 
-	    loggedErrors.push(err);
+	    dispatchedErrors.push(err);
 
 	    setTimeout(function () {
 	        throw err;
 	    }, 1);
+
+	    for (var j = 0; j < possiblyUnhandledPromiseHandlers.length; j++) {
+	        possiblyUnhandledPromiseHandlers[j](promise.value);
+	    }
 	}
 
 	var toString = {}.toString;
@@ -268,7 +275,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.resolved = false;
 	    this.rejected = false;
 
-	    this.hasHandlers = false;
+	    this.silentReject = false;
 
 	    this.handlers = [];
 
@@ -333,7 +340,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	SyncPromise.prototype.asyncReject = function (error) {
-	    this.hasHandlers = true;
+	    this.silentReject = true;
 	    return this.reject(error);
 	};
 
@@ -358,6 +365,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (handler.onError) {
 	                    result = handler.onError(_this.value);
 	                } else {
+
+	                    if (handler.promise && _this.silentReject) {
+	                        handler.promise.silentReject = true;
+	                    }
+
 	                    error = _this.value;
 	                }
 	            }
@@ -411,7 +423,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        onError: onError
 	    });
 
-	    this.hasHandlers = true;
+	    this.silentReject = true;
 
 	    this.dispatch();
 
@@ -451,6 +463,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                promise.resolve(results);
 	            }
 	        }, function (err) {
+
+	            if (prom.silentReject) {
+	                promise.silentReject = true;
+	            }
+
 	            promise.reject(err);
 	        });
 	    };
