@@ -111,7 +111,8 @@ $mockEndpoint.find = function(method, uri) {
 
 
 export function SyncXMLHttpRequest() {
-
+    this._requestHeaders = {};
+    this._eventHandlers = {};
 };
 
 SyncXMLHttpRequest.prototype = {
@@ -136,8 +137,13 @@ SyncXMLHttpRequest.prototype = {
         }
     },
 
-    setRequestHeader: function() {
+    addEventListener(name, handler) {
+        this._eventHandlers[name] = this._eventHandlers[name] || [];
+        this._eventHandlers[name].push(handler);
+    },
 
+    setRequestHeader: function(key, value) {
+        this._requestHeaders[key.toLowerCase()] = value;
     },
 
     getResponseHeader: function() {
@@ -150,7 +156,7 @@ SyncXMLHttpRequest.prototype = {
 
     send: function(data) {
 
-        if (data) {
+        if (data && this._requestHeaders['content-type'] === 'application/json') {
             data = JSON.parse(data);
         }
 
@@ -182,6 +188,16 @@ SyncXMLHttpRequest.prototype = {
             return;
         }
 
+        this.status = status;
+        this.response = this.responseText = JSON.stringify(response);
+        this.readyState = 4;
+
+        if (this._eventHandlers.load) {
+            for (let handler of this._eventHandlers.load) {
+                handler.call(this);
+            }
+        }
+
         let callback = this.onreadystatechange || this.onload;
 
         if (!callback) {
@@ -191,10 +207,6 @@ SyncXMLHttpRequest.prototype = {
         this._responded = true;
 
         console.debug('RESPONSE', status, JSON.stringify(response, 0, 2));
-
-        this.status = status;
-        this.response = this.responseText = JSON.stringify(response);
-        this.readyState = 4;
 
         callback.call(this);
     }
