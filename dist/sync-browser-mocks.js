@@ -787,7 +787,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return match;
 	};
 
-	function SyncXMLHttpRequest() {};
+	function SyncXMLHttpRequest() {
+	    this._requestHeaders = {};
+	    this._eventHandlers = {};
+	};
 
 	SyncXMLHttpRequest.prototype = {
 
@@ -811,7 +814,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    },
 
-	    setRequestHeader: function setRequestHeader() {},
+	    addEventListener: function addEventListener(name, handler) {
+	        this._eventHandlers[name] = this._eventHandlers[name] || [];
+	        this._eventHandlers[name].push(handler);
+	    },
+
+
+	    setRequestHeader: function setRequestHeader(key, value) {
+	        this._requestHeaders[key.toLowerCase()] = value;
+	    },
 
 	    getResponseHeader: function getResponseHeader() {},
 
@@ -822,7 +833,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    send: function send(data) {
 	        var _this2 = this;
 
-	        if (data) {
+	        if (data && this._requestHeaders['content-type'] === 'application/json') {
 	            data = JSON.parse(data);
 	        }
 
@@ -854,6 +865,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return;
 	        }
 
+	        this.status = status;
+	        this.response = this.responseText = JSON.stringify(response);
+	        this.readyState = 4;
+
+	        if (this._eventHandlers.load) {
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
+
+	            try {
+	                for (var _iterator = this._eventHandlers.load[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var handler = _step.value;
+
+	                    handler.call(this);
+	                }
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator['return']) {
+	                        _iterator['return']();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
+	                }
+	            }
+	        }
+
 	        var callback = this.onreadystatechange || this.onload;
 
 	        if (!callback) {
@@ -863,10 +905,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._responded = true;
 
 	        console.debug('RESPONSE', status, JSON.stringify(response, 0, 2));
-
-	        this.status = status;
-	        this.response = this.responseText = JSON.stringify(response);
-	        this.readyState = 4;
 
 	        callback.call(this);
 	    }
