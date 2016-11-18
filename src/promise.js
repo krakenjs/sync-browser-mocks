@@ -85,7 +85,7 @@ function dispatchError(err) {
     }, 1);
 
     for (let j = 0; j < possiblyUnhandledPromiseHandlers.length; j++) {
-        possiblyUnhandledPromiseHandlers[j](promise.value);
+        possiblyUnhandledPromiseHandlers[j](err);
     }
 }
 
