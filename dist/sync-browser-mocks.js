@@ -232,7 +232,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, 1);
 
 	    for (var j = 0; j < possiblyUnhandledPromiseHandlers.length; j++) {
-	        possiblyUnhandledPromiseHandlers[j](promise.value);
+	        possiblyUnhandledPromiseHandlers[j](err);
 	    }
 	}
 
