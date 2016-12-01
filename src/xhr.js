@@ -117,6 +117,8 @@ export function SyncXMLHttpRequest() {
 
 SyncXMLHttpRequest.prototype = {
 
+    DONE: 4,
+
     listen: function() {
 
     },
