@@ -794,6 +794,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	SyncXMLHttpRequest.prototype = {
 
+	    DONE: 4,
+
 	    listen: function listen() {},
 
 	    open: function open(method, uri) {
