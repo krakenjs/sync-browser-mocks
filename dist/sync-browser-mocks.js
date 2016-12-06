@@ -361,15 +361,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        try {
 	            if (_this.resolved) {
 	                result = handler.onSuccess ? handler.onSuccess(_this.value) : _this.value;
-	            } else {
+	            } else if (_this.rejected) {
 	                if (handler.onError) {
 	                    result = handler.onError(_this.value);
 	                } else {
-
-	                    if (handler.promise && _this.silentReject) {
-	                        handler.promise.silentReject = true;
-	                    }
-
 	                    error = _this.value;
 	                }
 	            }
@@ -463,11 +458,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                promise.resolve(results);
 	            }
 	        }, function (err) {
-
-	            if (prom.silentReject) {
-	                promise.silentReject = true;
-	            }
-
 	            promise.reject(err);
 	        });
 	    };
