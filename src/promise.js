@@ -195,7 +195,7 @@ SyncPromise.prototype.reject = function(error) {
 
 SyncPromise.prototype.asyncReject = function(error) {
     this.silentReject = true;
-    return this.reject(error);
+    this.reject(error);
 }
 
 SyncPromise.prototype.dispatch = function() {
