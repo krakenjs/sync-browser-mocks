@@ -213,15 +213,10 @@ SyncPromise.prototype.dispatch = function() {
         try {
             if (this.resolved) {
                 result = handler.onSuccess ? handler.onSuccess(this.value) : this.value;
-            } else {
+            } else if (this.rejected) {
                 if (handler.onError) {
                     result = handler.onError(this.value);
                 } else {
-
-                    if (handler.promise && this.silentReject) {
-                        handler.promise.silentReject = true;
-                    }
-
                     error = this.value;
                 }
             }
@@ -310,11 +305,6 @@ SyncPromise.all = function(promises) {
                 promise.resolve(results);
             }
         }, function(err) {
-
-            if (prom.silentReject) {
-                promise.silentReject = true;
-            }
-
             promise.reject(err);
         });
     }
