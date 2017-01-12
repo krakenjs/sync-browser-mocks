@@ -509,6 +509,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	};
 
+	SyncPromise.promisifyCall = function () {
+
+	    var args = Array.prototype.slice.call(arguments);
+	    var method = args.shift();
+
+	    if (typeof method !== 'function') {
+	        throw new Error('Expected promisifyCall to be called with a function');
+	    }
+
+	    return new SyncPromise(function (resolve, reject) {
+
+	        args.push(function (err, result) {
+	            return err ? reject(err) : resolve(result);
+	        });
+
+	        return method.apply(null, args);
+	    });
+	};
+
 	function patchPromise() {
 	    window.Promise = SyncPromise;
 	}
