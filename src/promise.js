@@ -348,6 +348,25 @@ SyncPromise.hash = function(obj) {
     });
 }
 
+SyncPromise.promisifyCall = function() {
+
+    let args = Array.prototype.slice.call(arguments);
+    let method = args.shift();
+
+    if (typeof method !== 'function') {
+        throw new Error(`Expected promisifyCall to be called with a function`);
+    }
+
+    return new SyncPromise((resolve, reject) => {
+
+        args.push((err, result) => {
+            return err ? reject(err) : resolve(result);
+        });
+
+        return method.apply(null, args);
+    });
+}
+
 
 export function patchPromise() {
     window.Promise = SyncPromise;
