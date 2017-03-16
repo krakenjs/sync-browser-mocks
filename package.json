@@ -1,6 +1,6 @@
 {
   "name": "sync-browser-mocks",
-  "version": "1.0.37",
+  "version": "1.0.38",
   "description": "Synchronous browser mock shims.",
   "main": "index.js",
   "scripts": {
@@ -40,7 +40,5 @@
     "gulp-webpack": "^1.5.0",
     "webpack": "^1.13.0"
   },
-  "dependencies": {
-
-  }
+  "dependencies": {}
 }

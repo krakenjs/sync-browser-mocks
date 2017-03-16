@@ -1,7 +1,7 @@
 {
   "name": "sync-browser-mocks",
   "main": "index.js",
-  "version": "1.0.37",
+  "version": "1.0.38",
   "authors": [
     "Daniel Brain <dbrain@paypal.com>"
   ],
