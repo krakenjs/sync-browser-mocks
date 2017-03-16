@@ -41,7 +41,6 @@
     "webpack": "^1.13.0"
   },
   "dependencies": {
-    "es6-promise": "^3.1.2",
-    "es6-promise-min": "^2.0.1"
+
   }
 }
