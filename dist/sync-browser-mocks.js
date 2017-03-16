@@ -64,7 +64,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _postMessage = __webpack_require__(1);
 
 	Object.keys(_postMessage).forEach(function (key) {
-	    if (key === "default") return;
+	    if (key === "default" || key === "__esModule") return;
 	    Object.defineProperty(exports, key, {
 	        enumerable: true,
 	        get: function get() {
@@ -76,7 +76,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _promise = __webpack_require__(2);
 
 	Object.keys(_promise).forEach(function (key) {
-	    if (key === "default") return;
+	    if (key === "default" || key === "__esModule") return;
 	    Object.defineProperty(exports, key, {
 	        enumerable: true,
 	        get: function get() {
@@ -88,7 +88,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _timeout = __webpack_require__(3);
 
 	Object.keys(_timeout).forEach(function (key) {
-	    if (key === "default") return;
+	    if (key === "default" || key === "__esModule") return;
 	    Object.defineProperty(exports, key, {
 	        enumerable: true,
 	        get: function get() {
@@ -100,7 +100,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _xhr = __webpack_require__(4);
 
 	Object.keys(_xhr).forEach(function (key) {
-	    if (key === "default") return;
+	    if (key === "default" || key === "__esModule") return;
 	    Object.defineProperty(exports, key, {
 	        enumerable: true,
 	        get: function get() {
