@@ -25,6 +25,13 @@ var WEBPACK_CONFIG = {
   plugins: [
     new webpack.SourceMapDevToolPlugin({
         filename: '[file].map'
+    }),
+    new UglifyJSPlugin({
+        test: /\.js$/,
+        minimize: false,
+        compress: { warnings: false },
+        beautify: true,
+        sourceMap: true
     })
   ],
   output: {
