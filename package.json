@@ -28,7 +28,6 @@
   "devDependencies": {
     "babel-core": "^6.7.7",
     "babel-eslint": "^6.0.4",
-    "babel-loader": "^6.2.4",
     "babel-plugin-add-module-exports": "^0.1.4",
     "babel-plugin-syntax-object-rest-spread": "^6.5.0",
     "babel-plugin-transform-es3-member-expression-literals": "^6.5.0",
@@ -39,6 +38,8 @@
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
     "gulp-sourcemaps": "^2.4.1",
+    "source-map-loader": "^0.2.0",
+    "uglifyjs-webpack-plugin": "^0.3.1",
     "webpack": "^2.2.1",
     "webpack-stream": "^3.2.0"
   },

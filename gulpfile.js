@@ -4,6 +4,7 @@ var webpack = require('webpack');
 var gulpWebpack = require('webpack-stream');
 var babel = require('gulp-babel');
 var sourcemaps = require('gulp-sourcemaps');
+var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 gulp.task('build', ['babel', 'webpack', 'webpack-min']);
 
@@ -11,7 +12,21 @@ var FILE_NAME = 'sync-browser-mocks';
 var MODULE_NAME = 'syncBrowserMocks';
 
 var WEBPACK_CONFIG = {
-  
+
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        use: ["source-map-loader"],
+        enforce: "pre"
+      }
+    ]
+  },
+  plugins: [
+    new webpack.SourceMapDevToolPlugin({
+        filename: '[file].map'
+    })
+  ],
   output: {
     filename: `${FILE_NAME}.js`,
     libraryTarget: 'umd',
@@ -29,10 +44,14 @@ var WEBPACK_CONFIG_MIN = Object.assign({}, WEBPACK_CONFIG, {
     library: MODULE_NAME
   },
   plugins: [
-    new webpack.optimize.UglifyJsPlugin({
-      test: /\.js$/,
-      exclude: /(node_modules|bower_components)/,
-      minimize: true
+    new webpack.SourceMapDevToolPlugin({
+        filename: '[file].map'
+    }),
+    new UglifyJSPlugin({
+        test: /\.js$/,
+        minimize: true,
+        compress: { warnings: false },
+        sourceMap: true
     })
   ]
 });
