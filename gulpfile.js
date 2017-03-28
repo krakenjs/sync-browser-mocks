@@ -1,32 +1,17 @@
 
 var gulp = require('gulp');
 var webpack = require('webpack');
-var gulpWebpack = require('gulp-webpack');
+var gulpWebpack = require('webpack-stream');
+var babel = require('gulp-babel');
+var sourcemaps = require('gulp-sourcemaps');
 
-gulp.task('build', ['webpack', 'webpack-min']);
+gulp.task('build', ['babel', 'webpack', 'webpack-min']);
 
 var FILE_NAME = 'sync-browser-mocks';
 var MODULE_NAME = 'syncBrowserMocks';
 
 var WEBPACK_CONFIG = {
-  module: {
-    loaders: [
-      {
-        test: /\.js$/,
-        exclude: /(node_modules|bower_components)/,
-        loader: 'babel',
-        query: {
-          presets: ['es2015'],
-          plugins: [
-            'transform-object-rest-spread',
-            'syntax-object-rest-spread',
-            'transform-es3-property-literals',
-            'transform-es3-member-expression-literals'
-          ]
-        }
-      }
-    ]
-  },
+  
   output: {
     filename: `${FILE_NAME}.js`,
     libraryTarget: 'umd',
@@ -53,14 +38,22 @@ var WEBPACK_CONFIG_MIN = Object.assign({}, WEBPACK_CONFIG, {
 });
 
 
-gulp.task('webpack', function() {
-  return gulp.src('src/index.js')
-      .pipe(gulpWebpack(WEBPACK_CONFIG))
-      .pipe(gulp.dest('dist'));
+gulp.task('webpack', ['babel'], function() {
+  return gulp.src('dist/index.js')
+      .pipe(gulpWebpack(WEBPACK_CONFIG, webpack))
+      .pipe(gulp.dest('dist/webpacks'));
 });
 
-gulp.task('webpack-min', function() {
-  return gulp.src('src/index.js')
-      .pipe(gulpWebpack(WEBPACK_CONFIG_MIN))
-      .pipe(gulp.dest('dist'));
+gulp.task('webpack-min', ['babel'], function() {
+  return gulp.src('dist/index.js')
+      .pipe(gulpWebpack(WEBPACK_CONFIG_MIN, webpack))
+      .pipe(gulp.dest('dist/webpacks'));
+});
+
+gulp.task('babel', function () {
+	return gulp.src('src/**/*.js')
+    .pipe(sourcemaps.init())
+		.pipe(babel())
+    .pipe(sourcemaps.write('.'))
+		.pipe(gulp.dest('dist'))
 });
