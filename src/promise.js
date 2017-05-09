@@ -208,6 +208,7 @@ SyncPromise.prototype.dispatch = function() {
 
         let handler = this.handlers.shift();
 
+        let isError = false;
         let result, error;
 
         try {
@@ -217,10 +218,12 @@ SyncPromise.prototype.dispatch = function() {
                 if (handler.onError) {
                     result = handler.onError(this.value);
                 } else {
+                    isError = true;
                     error = this.value;
                 }
             }
         } catch (err) {
+            isError = true;
             error = err;
         }
 
@@ -232,7 +235,7 @@ SyncPromise.prototype.dispatch = function() {
             continue;
         }
 
-        if (error) {
+        if (isError) {
             handler.promise.reject(error);
 
         } else if (isPromise(result)) {
