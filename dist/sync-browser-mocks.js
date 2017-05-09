@@ -332,6 +332,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('Can not reject promise with another promise');
 	    }
 
+	    if (!(error instanceof Error)) {
+	        error = new Error('Expected reject to be called with Error, got ' + error);
+	    }
+
 	    this.rejected = true;
 	    this.value = error;
 	    this.dispatch();
@@ -355,6 +359,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var handler = _this.handlers.shift();
 
+	        var isError = false;
 	        var result = void 0,
 	            error = void 0;
 
@@ -365,10 +370,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (handler.onError) {
 	                    result = handler.onError(_this.value);
 	                } else {
+	                    isError = true;
 	                    error = _this.value;
 	                }
 	            }
 	        } catch (err) {
+	            isError = true;
 	            error = err;
 	        }
 
@@ -380,7 +387,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return 'continue';
 	        }
 
-	        if (error) {
+	        if (isError) {
 	            handler.promise.reject(error);
 	        } else if (isPromise(result)) {
 	            result.then(function (res) {
