@@ -186,6 +186,10 @@ SyncPromise.prototype.reject = function(error) {
         throw new Error('Can not reject promise with another promise');
     }
 
+    if (!(error instanceof Error)) {
+        error = new Error(`Expected reject to be called with Error, got ${error}`);
+    }
+
     this.rejected = true;
     this.value = error;
     this.dispatch();
