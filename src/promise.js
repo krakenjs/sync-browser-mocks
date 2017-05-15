@@ -190,6 +190,10 @@ SyncPromise.prototype.reject = function(error) {
     //     error = new Error(`Expected reject to be called with Error, got ${error}`);
     // }
 
+    if (!error) {
+        error = new Error(`Expected reject to be called with Error, got ${error}`);
+    }
+
     this.rejected = true;
     this.value = error;
     this.dispatch();
