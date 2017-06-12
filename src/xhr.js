@@ -61,12 +61,12 @@ $mockEndpoint.prototype = {
         return Boolean(this.method.test(method) && this.uri.test(uri));
     },
 
-    call(data, params) {
+    call(options) {
 
         this.called = true;
 
         if (this.handler) {
-            return this.handler(data, params);
+            return this.handler(options);
         }
 
         return this.data;
@@ -138,11 +138,11 @@ SyncXMLHttpRequest.prototype = {
         this.method = method;
         this.uri = uri;
         this.mock = $mockEndpoint.find(method, uri);
-        this.params = {};
+        this.query = {};
         var params = uri.indexOf('?') >= 0 ? uri.substr(uri.indexOf('?') + 1).split('&') : [];
         params.forEach((param) => {
             var temp = param.split('=');
-            this.params[decodeURIComponent(temp[0])] = decodeURIComponent(temp[1]);
+            this.query[decodeURIComponent(temp[0])] = decodeURIComponent(temp[1]);
         });
 
         if (!this.mock) {
@@ -177,7 +177,7 @@ SyncXMLHttpRequest.prototype = {
 
         console.debug('REQUEST', this.method, this.uri, data);
 
-        var response = this.mock.call(data, this.params);
+        var response = this.mock.call({ data, query: this.query, headers: this._requestHeaders });
 
         this._respond(this.mock.status, response);
 
