@@ -20,6 +20,17 @@ export function $mockEndpoint(options) {
     this.handler = options.handler;
     this.data = options.data;
 
+    if (options.headers) {
+        this.headers = {};
+        Object.keys(options.headers).forEach(key => {
+            this.headers[key.toLowerCase()] = options.headers[key];
+        });
+    } else {
+        this.headers = {
+            'content-type': 'application/json'
+        };
+    }
+
     endpoints.unshift(this);
 }
 
@@ -148,12 +159,14 @@ SyncXMLHttpRequest.prototype = {
         this._requestHeaders[key.toLowerCase()] = value;
     },
 
-    getResponseHeader: function() {
-
+    getResponseHeader: function(name) {
+        return this.mock.headers[name.toLowerCase()];
     },
 
     getAllResponseHeaders: function() {
-        return 'Content-Type: application/json';
+        return Object.keys(this.mock.headers).map(key => {
+            return `${key}: ${this.mock.headers[key]}`;
+        }).join('\n');
     },
 
     send: function(data) {
