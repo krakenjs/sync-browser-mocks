@@ -760,12 +760,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    match: function match(method, uri) {
 	        return Boolean(this.method.test(method) && this.uri.test(uri));
 	    },
-	    call: function call(data, params) {
+	    call: function call(options) {
 
 	        this.called = true;
 
 	        if (this.handler) {
-	            return this.handler(data, params);
+	            return this.handler(options);
 	        }
 
 	        return this.data;
@@ -836,11 +836,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.method = method;
 	        this.uri = uri;
 	        this.mock = $mockEndpoint.find(method, uri);
-	        this.params = {};
+	        this.query = {};
 	        var params = uri.indexOf('?') >= 0 ? uri.substr(uri.indexOf('?') + 1).split('&') : [];
 	        params.forEach(function (param) {
 	            var temp = param.split('=');
-	            _this2.params[decodeURIComponent(temp[0])] = decodeURIComponent(temp[1]);
+	            _this2.query[decodeURIComponent(temp[0])] = decodeURIComponent(temp[1]);
 	        });
 
 	        if (!this.mock) {
@@ -879,7 +879,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        console.debug('REQUEST', this.method, this.uri, data);
 
-	        var response = this.mock.call(data, this.params);
+	        var response = this.mock.call({ data: data, query: this.query, headers: this._requestHeaders });
 
 	        this._respond(this.mock.status, response);
 
