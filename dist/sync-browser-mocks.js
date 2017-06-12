@@ -703,6 +703,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var endpoints = [];
 
 	function $mockEndpoint(options) {
+	    var _this = this;
 
 	    options.method = options.method || 'GET';
 
@@ -720,6 +721,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    this.handler = options.handler;
 	    this.data = options.data;
+
+	    if (options.headers) {
+	        this.headers = {};
+	        Object.keys(options.headers).forEach(function (key) {
+	            _this.headers[key.toLowerCase()] = options.headers[key];
+	        });
+	    } else {
+	        this.headers = {
+	            'content-type': 'application/json'
+	        };
+	    }
 
 	    endpoints.unshift(this);
 	}
@@ -819,7 +831,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    listen: function listen() {},
 
 	    open: function open(method, uri) {
-	        var _this = this;
+	        var _this2 = this;
 
 	        this.method = method;
 	        this.uri = uri;
@@ -828,7 +840,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var params = uri.indexOf('?') >= 0 ? uri.substr(uri.indexOf('?') + 1).split('&') : [];
 	        params.forEach(function (param) {
 	            var temp = param.split('=');
-	            _this.params[decodeURIComponent(temp[0])] = decodeURIComponent(temp[1]);
+	            _this2.params[decodeURIComponent(temp[0])] = decodeURIComponent(temp[1]);
 	        });
 
 	        if (!this.mock) {
@@ -846,14 +858,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._requestHeaders[key.toLowerCase()] = value;
 	    },
 
-	    getResponseHeader: function getResponseHeader() {},
+	    getResponseHeader: function getResponseHeader(name) {
+	        return this.mock.headers[name.toLowerCase()];
+	    },
 
 	    getAllResponseHeaders: function getAllResponseHeaders() {
-	        return 'Content-Type: application/json';
+	        var _this3 = this;
+
+	        return Object.keys(this.mock.headers).map(function (key) {
+	            return key + ': ' + _this3.mock.headers[key];
+	        }).join('\n');
 	    },
 
 	    send: function send(data) {
-	        var _this2 = this;
+	        var _this4 = this;
 
 	        if (data && this._requestHeaders['content-type'] === 'application/json') {
 	            data = JSON.parse(data);
@@ -873,7 +891,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            },
 	            set: function set(value) {
 	                callback = value;
-	                _this2._respond(_this2.mock.status, response);
+	                _this4._respond(_this4.mock.status, response);
 	            }
 	        };
 
