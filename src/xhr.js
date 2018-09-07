@@ -39,6 +39,7 @@ $mockEndpoint.prototype = {
     enabled: false,
     expect: false,
     called: false,
+    listeners: [],
 
     listen: function() {
         this.listening = true;
@@ -65,6 +66,8 @@ $mockEndpoint.prototype = {
 
         this.called = true;
 
+        this.listeners.forEach(listener => listener());
+
         if (this.handler) {
             return this.handler(options);
         }
@@ -82,6 +85,10 @@ $mockEndpoint.prototype = {
 
         this.enable();
         return this;
+    },
+
+    onCall: function(listener) {
+        this.listeners.push(listener);
     },
 
     done() {
