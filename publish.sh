@@ -17,7 +17,7 @@ gulp build;
 git add dist;
 git commit -m "Dist" || echo "Nothing to distribute";
 
-mversion patch -m '%s';
+npm version ${1-patch};
 
 git push;
 git push --tags;
