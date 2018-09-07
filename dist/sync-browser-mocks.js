@@ -52,7 +52,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -61,31 +61,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.patchAll = patchAll;
 
-	var _postMessage = __webpack_require__(1);
-
-	Object.keys(_postMessage).forEach(function (key) {
-	    if (key === "default" || key === "__esModule") return;
-	    Object.defineProperty(exports, key, {
-	        enumerable: true,
-	        get: function get() {
-	            return _postMessage[key];
-	        }
-	    });
-	});
-
-	var _promise = __webpack_require__(2);
-
-	Object.keys(_promise).forEach(function (key) {
-	    if (key === "default" || key === "__esModule") return;
-	    Object.defineProperty(exports, key, {
-	        enumerable: true,
-	        get: function get() {
-	            return _promise[key];
-	        }
-	    });
-	});
-
-	var _timeout = __webpack_require__(3);
+	var _timeout = __webpack_require__(1);
 
 	Object.keys(_timeout).forEach(function (key) {
 	    if (key === "default" || key === "__esModule") return;
@@ -97,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	});
 
-	var _xhr = __webpack_require__(4);
+	var _xhr = __webpack_require__(2);
 
 	Object.keys(_xhr).forEach(function (key) {
 	    if (key === "default" || key === "__esModule") return;
@@ -109,443 +85,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	});
 	function patchAll() {
-	    (0, _postMessage.patchPostMessage)();
-	    (0, _promise.patchPromise)();
 	    (0, _timeout.patchSetTimeout)();
 	    (0, _timeout.patchSetInterval)();
 	    (0, _xhr.patchXmlHttpRequest)();
 	}
 
-/***/ },
+/***/ }),
 /* 1 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.patchPostMessage = patchPostMessage;
-	function patchPostMessage() {}
-
-/***/ },
-/* 2 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.patchPromise = patchPromise;
-
-	function trycatch(method, successHandler, errorHandler) {
-
-	    var isCalled = false;
-	    var isSuccess = false;
-	    var isError = false;
-	    var err = void 0,
-	        res = void 0;
-
-	    function flush() {
-	        if (isCalled) {
-	            if (isError) {
-	                return errorHandler(err);
-	            } else if (isSuccess) {
-	                return successHandler(res);
-	            }
-	        }
-	    }
-
-	    try {
-	        method(function (result) {
-	            res = result;
-	            isSuccess = true;
-	            flush();
-	        }, function (error) {
-	            err = error;
-	            isError = true;
-	            flush();
-	        });
-	    } catch (error) {
-	        return errorHandler(error);
-	    }
-
-	    isCalled = true;
-	    flush();
-	}
-
-	var possiblyUnhandledPromiseHandlers = [];
-	var possiblyUnhandledPromises = [];
-	var possiblyUnhandledPromiseTimeout = void 0;
-
-	function addPossiblyUnhandledPromise(promise) {
-	    possiblyUnhandledPromises.push(promise);
-	    possiblyUnhandledPromiseTimeout = possiblyUnhandledPromiseTimeout || setTimeout(flushPossiblyUnhandledPromises, 1);
-	}
-
-	function flushPossiblyUnhandledPromises() {
-
-	    possiblyUnhandledPromiseTimeout = null;
-	    var promises = possiblyUnhandledPromises;
-	    possiblyUnhandledPromises = [];
-
-	    var _loop = function _loop(i) {
-	        var promise = promises[i];
-
-	        if (promise.silentReject) {
-	            return 'continue';
-	        }
-
-	        promise.handlers.push({
-	            onError: function onError(err) {
-	                if (promise.silentReject) {
-	                    return;
-	                }
-
-	                dispatchError(err);
-	            }
-	        });
-
-	        promise.dispatch();
-	    };
-
-	    for (var i = 0; i < promises.length; i++) {
-	        var _ret = _loop(i);
-
-	        if (_ret === 'continue') continue;
-	    }
-	}
-
-	var dispatchedErrors = [];
-
-	function dispatchError(err) {
-
-	    if (dispatchedErrors.indexOf(err) !== -1) {
-	        return;
-	    }
-
-	    dispatchedErrors.push(err);
-
-	    setTimeout(function () {
-	        throw err;
-	    }, 1);
-
-	    for (var j = 0; j < possiblyUnhandledPromiseHandlers.length; j++) {
-	        possiblyUnhandledPromiseHandlers[j](err);
-	    }
-	}
-
-	var toString = {}.toString;
-
-	function isPromise(item) {
-	    try {
-	        if (!item) {
-	            return false;
-	        }
-
-	        if (window.Window && item instanceof window.Window) {
-	            return false;
-	        }
-
-	        if (window.constructor && item instanceof window.constructor) {
-	            return false;
-	        }
-
-	        if (toString) {
-	            var name = toString.call(item);
-
-	            if (name === '[object Window]' || name === '[object global]' || name === '[object DOMWindow]') {
-	                return false;
-	            }
-	        }
-
-	        if (item && item.then instanceof Function) {
-	            return true;
-	        }
-	    } catch (err) {
-	        return false;
-	    }
-
-	    return false;
-	}
-
-	var SyncPromise = exports.SyncPromise = function SyncPromise(handler) {
-
-	    this.resolved = false;
-	    this.rejected = false;
-
-	    this.silentReject = false;
-
-	    this.handlers = [];
-
-	    addPossiblyUnhandledPromise(this);
-
-	    if (!handler) {
-	        return;
-	    }
-
-	    var self = this;
-
-	    trycatch(handler, function (res) {
-	        return self.resolve(res);
-	    }, function (err) {
-	        return self.reject(err);
-	    });
-	};
-
-	SyncPromise.resolve = function SyncPromiseResolve(value) {
-
-	    if (isPromise(value)) {
-	        return value;
-	    }
-
-	    return new SyncPromise().resolve(value);
-	};
-
-	SyncPromise.reject = function SyncPromiseResolve(error) {
-	    return new SyncPromise().reject(error);
-	};
-
-	SyncPromise.prototype.resolve = function (result) {
-	    if (this.resolved || this.rejected) {
-	        return this;
-	    }
-
-	    if (isPromise(result)) {
-	        throw new Error('Can not resolve promise with another promise');
-	    }
-
-	    this.resolved = true;
-	    this.value = result;
-	    this.dispatch();
-
-	    return this;
-	};
-
-	SyncPromise.prototype.reject = function (error) {
-	    if (this.resolved || this.rejected) {
-	        return this;
-	    }
-
-	    if (isPromise(error)) {
-	        throw new Error('Can not reject promise with another promise');
-	    }
-
-	    // if (!(error instanceof Error)) {
-	    //     error = new Error(`Expected reject to be called with Error, got ${error}`);
-	    // }
-
-	    if (!error) {
-	        error = new Error('Expected reject to be called with Error, got ' + error);
-	    }
-
-	    this.rejected = true;
-	    this.value = error;
-	    this.dispatch();
-
-	    return this;
-	};
-
-	SyncPromise.prototype.asyncReject = function (error) {
-	    this.silentReject = true;
-	    this.reject(error);
-	};
-
-	SyncPromise.prototype.dispatch = function () {
-	    var _this = this;
-
-	    if (!this.resolved && !this.rejected) {
-	        return;
-	    }
-
-	    var _loop2 = function _loop2() {
-
-	        var handler = _this.handlers.shift();
-
-	        var isError = false;
-	        var result = void 0,
-	            error = void 0;
-
-	        try {
-	            if (_this.resolved) {
-	                result = handler.onSuccess ? handler.onSuccess(_this.value) : _this.value;
-	            } else if (_this.rejected) {
-	                if (handler.onError) {
-	                    result = handler.onError(_this.value);
-	                } else {
-	                    isError = true;
-	                    error = _this.value;
-	                }
-	            }
-	        } catch (err) {
-	            isError = true;
-	            error = err;
-	        }
-
-	        if (result === _this) {
-	            throw new Error('Can not return a promise from the the then handler of the same promise');
-	        }
-
-	        if (!handler.promise) {
-	            return 'continue';
-	        }
-
-	        if (isError) {
-	            handler.promise.reject(error);
-	        } else if (isPromise(result)) {
-	            result.then(function (res) {
-	                handler.promise.resolve(res);
-	            }, function (err) {
-	                handler.promise.reject(err);
-	            });
-	        } else {
-	            handler.promise.resolve(result);
-	        }
-	    };
-
-	    while (this.handlers.length) {
-	        var _ret2 = _loop2();
-
-	        if (_ret2 === 'continue') continue;
-	    }
-	};
-
-	SyncPromise.prototype.then = function (onSuccess, onError) {
-
-	    if (onSuccess && typeof onSuccess !== 'function' && !onSuccess.call) {
-	        throw new Error('Promise.then expected a function for success handler');
-	    }
-
-	    if (onError && typeof onError !== 'function' && !onError.call) {
-	        throw new Error('Promise.then expected a function for error handler');
-	    }
-
-	    var promise = new SyncPromise(null, this);
-
-	    this.handlers.push({
-	        promise: promise,
-	        onSuccess: onSuccess,
-	        onError: onError
-	    });
-
-	    this.silentReject = true;
-
-	    this.dispatch();
-
-	    return promise;
-	};
-
-	SyncPromise.prototype['catch'] = function (onError) {
-	    return this.then(null, onError);
-	};
-
-	SyncPromise.prototype['finally'] = function (handler) {
-	    return this.then(function (result) {
-	        return SyncPromise['try'](handler).then(function () {
-	            return result;
-	        });
-	    }, function (err) {
-	        return SyncPromise['try'](handler).then(function () {
-	            throw err;
-	        });
-	    });
-	};
-
-	SyncPromise.all = function (promises) {
-
-	    var promise = new SyncPromise();
-	    var count = promises.length;
-	    var results = [];
-
-	    var _loop3 = function _loop3(i) {
-
-	        var prom = isPromise(promises[i]) ? promises[i] : SyncPromise.resolve(promises[i]);
-
-	        prom.then(function (result) {
-	            results[i] = result;
-	            count -= 1;
-	            if (count === 0) {
-	                promise.resolve(results);
-	            }
-	        }, function (err) {
-	            promise.reject(err);
-	        });
-	    };
-
-	    for (var i = 0; i < promises.length; i++) {
-	        _loop3(i);
-	    }
-
-	    if (!count) {
-	        promise.resolve(results);
-	    }
-
-	    return promise;
-	};
-
-	SyncPromise.onPossiblyUnhandledException = function syncPromiseOnPossiblyUnhandledException(handler) {
-	    possiblyUnhandledPromiseHandlers.push(handler);
-	};
-
-	SyncPromise['try'] = function syncPromiseTry(method) {
-	    return SyncPromise.resolve().then(method);
-	};
-
-	SyncPromise.delay = function syncPromiseDelay(delay) {
-	    return new SyncPromise(function (resolve) {
-	        setTimeout(resolve, delay);
-	    });
-	};
-
-	SyncPromise.hash = function (obj) {
-
-	    var results = {};
-	    var promises = [];
-
-	    var _loop4 = function _loop4(key) {
-	        if (obj.hasOwnProperty(key)) {
-	            promises.push(SyncPromise.resolve(obj[key]).then(function (result) {
-	                results[key] = result;
-	            }));
-	        }
-	    };
-
-	    for (var key in obj) {
-	        _loop4(key);
-	    }
-
-	    return SyncPromise.all(promises).then(function () {
-	        return results;
-	    });
-	};
-
-	SyncPromise.promisifyCall = function () {
-
-	    var args = Array.prototype.slice.call(arguments);
-	    var method = args.shift();
-
-	    if (typeof method !== 'function') {
-	        throw new Error('Expected promisifyCall to be called with a function');
-	    }
-
-	    return new SyncPromise(function (resolve, reject) {
-
-	        args.push(function (err, result) {
-	            return err ? reject(err) : resolve(result);
-	        });
-
-	        return method.apply(null, args);
-	    });
-	};
-
-	function patchPromise() {
-	    window.Promise = SyncPromise;
-	}
-
-/***/ },
-/* 3 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	"use strict";
 
@@ -687,9 +234,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    window.clearInterval = syncClearInterval;
 	}
 
-/***/ },
-/* 4 */
-/***/ function(module, exports) {
+/***/ }),
+/* 2 */
+/***/ (function(module, exports) {
 
 	'use strict';
 
@@ -741,6 +288,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    enabled: false,
 	    expect: false,
 	    called: false,
+	    listeners: [],
 
 	    listen: function listen() {
 	        this.listening = true;
@@ -764,6 +312,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        this.called = true;
 
+	        this.listeners.forEach(function (listener) {
+	            return listener();
+	        });
+
 	        if (this.handler) {
 	            return this.handler(options);
 	        }
@@ -782,6 +334,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        this.enable();
 	        return this;
+	    },
+
+	    onCall: function onCall(listener) {
+	        this.listeners.push(listener);
 	    },
 
 	    done: function done() {
@@ -954,7 +510,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    window.XMLHttpRequest = SyncXMLHttpRequest;
 	}
 
-/***/ }
+/***/ })
 /******/ ])
 });
 ;
