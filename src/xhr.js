@@ -41,7 +41,7 @@ $mockEndpoint.prototype = {
     called: false,
     listeners: [],
 
-    listen: function() {
+    listen() {
         this.listening = true;
         this.enable();
         return this;
@@ -75,7 +75,7 @@ $mockEndpoint.prototype = {
         return this.data;
     },
 
-    expectCalls: function() {
+    expectCalls() {
 
         endpoints.splice(endpoints.indexOf(this), 1);
         endpoints.unshift(this);
@@ -87,7 +87,7 @@ $mockEndpoint.prototype = {
         return this;
     },
 
-    onCall: function(listener) {
+    onCall(listener) {
         this.listeners.push(listener);
     },
 
@@ -131,17 +131,17 @@ $mockEndpoint.find = function(method, uri) {
 export function SyncXMLHttpRequest() {
     this._requestHeaders = {};
     this._eventHandlers = {};
-};
+}
 
 SyncXMLHttpRequest.prototype = {
 
     DONE: 4,
 
-    listen: function() {
+    listen() {
 
     },
 
-    open: function(method, uri) {
+    open(method, uri) {
         this.method = method;
         this.uri = uri;
         this.mock = $mockEndpoint.find(method, uri);
@@ -162,21 +162,21 @@ SyncXMLHttpRequest.prototype = {
         this._eventHandlers[name].push(handler);
     },
 
-    setRequestHeader: function(key, value) {
+    setRequestHeader(key, value) {
         this._requestHeaders[key.toLowerCase()] = value;
     },
 
-    getResponseHeader: function(name) {
+    getResponseHeader(name) {
         return this.mock.headers[name.toLowerCase()];
     },
 
-    getAllResponseHeaders: function() {
+    getAllResponseHeaders() {
         return Object.keys(this.mock.headers).map(key => {
             return `${key}: ${this.mock.headers[key]}`;
         }).join('\n');
     },
 
-    send: function(data) {
+    send(data) {
 
         if (data && this._requestHeaders['content-type'] === 'application/json') {
             data = JSON.parse(data);
