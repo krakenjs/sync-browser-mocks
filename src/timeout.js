@@ -33,9 +33,9 @@ export function syncSetTimeout(method, time) {
     }, time);
 
     let task = {
-        id: id,
-        time: time,
-        method: method,
+        id,
+        time,
+        method,
         count: timeoutCount++
     };
 
@@ -81,9 +81,9 @@ export function syncSetInterval(method, time) {
     let id = windowSetInterval(method, time);
 
     let task = {
-        id: id,
-        time: time,
-        method: method,
+        id,
+        time,
+        method,
         count: intervalCount++
     };
 
