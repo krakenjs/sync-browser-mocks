@@ -84,10 +84,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    });
 	});
+
+	var _webSocket = __webpack_require__(3);
+
+	Object.keys(_webSocket).forEach(function (key) {
+	    if (key === "default" || key === "__esModule") return;
+	    Object.defineProperty(exports, key, {
+	        enumerable: true,
+	        get: function get() {
+	            return _webSocket[key];
+	        }
+	    });
+	});
+
+	var _websocket = __webpack_require__(4);
+
 	function patchAll() {
 	    (0, _timeout.patchSetTimeout)();
 	    (0, _timeout.patchSetInterval)();
 	    (0, _xhr.patchXmlHttpRequest)();
+	    (0, _websocket.patchWebSocket)();
 	}
 
 /***/ }),
@@ -295,7 +311,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.enable();
 	        return this;
 	    },
-
 	    enable: function enable() {
 	        this.enabled = true;
 	        return this;
@@ -322,8 +337,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        return this.data;
 	    },
-
-
 	    expectCalls: function expectCalls() {
 
 	        endpoints.splice(endpoints.indexOf(this), 1);
@@ -335,11 +348,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.enable();
 	        return this;
 	    },
-
 	    onCall: function onCall(listener) {
 	        this.listeners.push(listener);
 	    },
-
 	    done: function done() {
 
 	        var notCalled = this.expect && !this.called;
@@ -378,14 +389,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	function SyncXMLHttpRequest() {
 	    this._requestHeaders = {};
 	    this._eventHandlers = {};
-	};
+	}
 
 	SyncXMLHttpRequest.prototype = {
 
 	    DONE: 4,
 
 	    listen: function listen() {},
-
 	    open: function open(method, uri) {
 	        var _this2 = this;
 
@@ -403,21 +413,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	            throw new Error('Unexpected ' + method.toUpperCase() + ' ' + uri);
 	        }
 	    },
-
 	    addEventListener: function addEventListener(name, handler) {
 	        this._eventHandlers[name] = this._eventHandlers[name] || [];
 	        this._eventHandlers[name].push(handler);
 	    },
-
-
 	    setRequestHeader: function setRequestHeader(key, value) {
 	        this._requestHeaders[key.toLowerCase()] = value;
 	    },
-
 	    getResponseHeader: function getResponseHeader(name) {
 	        return this.mock.headers[name.toLowerCase()];
 	    },
-
 	    getAllResponseHeaders: function getAllResponseHeaders() {
 	        var _this3 = this;
 
@@ -425,7 +430,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return key + ': ' + _this3.mock.headers[key];
 	        }).join('\n');
 	    },
-
 	    send: function send(data) {
 	        var _this4 = this;
 
@@ -454,7 +458,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        Object.defineProperty(this, 'onreadystatechange', descriptor);
 	        Object.defineProperty(this, 'onload', descriptor);
 	    },
-
 	    _respond: function _respond(status, response) {
 
 	        if (this._responded) {
@@ -508,6 +511,196 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function patchXmlHttpRequest() {
 	    window.XMLHttpRequest = SyncXMLHttpRequest;
+	}
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.mockWebSocket = mockWebSocket;
+	exports.patchWebSocket = patchWebSocket;
+
+	var mockWebSockets = [];
+
+	function mockWebSocket(_ref) {
+	    var uri = _ref.uri,
+	        handler = _ref.handler;
+
+	    var listening = false;
+	    var hasCalls = false;
+
+	    var mock = {
+	        isListening: function isListening(mockUri) {
+	            return listening && mockUri === uri;
+	        },
+	        listen: function listen() {
+	            listening = true;
+	            return {
+	                cancel: function cancel() {
+	                    listening = false;
+	                }
+	            };
+	        },
+	        receive: function receive(_ref2) {
+	            var receiveData = _ref2.data,
+	                socket = _ref2.socket;
+
+	            hasCalls = true;
+
+	            handler({
+	                data: receiveData,
+	                send: function send(sendData) {
+	                    if (socket.onmessage) {
+	                        socket.onmessage({
+	                            data: sendData
+	                        });
+	                    }
+	                }
+	            });
+	        },
+	        expect: function expect() {
+	            listening = true;
+	            return {
+	                done: function done() {
+	                    listening = false;
+	                    if (!hasCalls) {
+	                        throw new Error('Expected websocket calls');
+	                    }
+	                }
+	            };
+	        }
+	    };
+
+	    mockWebSockets.push(mock);
+
+	    return mock;
+	}
+
+	function SyncWebSocket(socketUri) {
+	    var socket = {
+	        send: function send(data) {
+	            for (var i = mockWebSockets.length - 1; i >= 0; i--) {
+	                var mock = mockWebSockets[i];
+
+	                if (mock.isListening(socketUri)) {
+	                    mock.receive({ data: data, socket: socket });
+	                    return;
+	                }
+	            }
+	        }
+	    };
+
+	    setTimeout(function () {
+	        if (socket.onopen) {
+	            socket.onopen();
+	        }
+	    });
+
+	    return socket;
+	}
+
+	function patchWebSocket() {
+	    window.WebSocket = SyncWebSocket;
+	}
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.mockWebSocket = mockWebSocket;
+	exports.patchWebSocket = patchWebSocket;
+
+	var mockWebSockets = [];
+
+	function mockWebSocket(_ref) {
+	    var uri = _ref.uri,
+	        handler = _ref.handler;
+
+	    var listening = false;
+	    var hasCalls = false;
+
+	    var mock = {
+	        isListening: function isListening(mockUri) {
+	            return listening && mockUri === uri;
+	        },
+	        listen: function listen() {
+	            listening = true;
+	            return {
+	                cancel: function cancel() {
+	                    listening = false;
+	                }
+	            };
+	        },
+	        receive: function receive(_ref2) {
+	            var receiveData = _ref2.data,
+	                socket = _ref2.socket;
+
+	            hasCalls = true;
+
+	            handler({
+	                data: receiveData,
+	                send: function send(sendData) {
+	                    if (socket.onmessage) {
+	                        socket.onmessage({
+	                            data: sendData
+	                        });
+	                    }
+	                }
+	            });
+	        },
+	        expect: function expect() {
+	            listening = true;
+	            return {
+	                done: function done() {
+	                    listening = false;
+	                    if (!hasCalls) {
+	                        throw new Error('Expected websocket calls');
+	                    }
+	                }
+	            };
+	        }
+	    };
+
+	    mockWebSockets.push(mock);
+
+	    return mock;
+	}
+
+	function SyncWebSocket(socketUri) {
+	    var socket = {
+	        send: function send(data) {
+	            for (var i = mockWebSockets.length - 1; i >= 0; i--) {
+	                var mock = mockWebSockets[i];
+
+	                if (mock.isListening(socketUri)) {
+	                    mock.receive({ data: data, socket: socket });
+	                    return;
+	                }
+	            }
+	        }
+	    };
+
+	    setTimeout(function () {
+	        if (socket.onopen) {
+	            socket.onopen();
+	        }
+	    });
+
+	    return socket;
+	}
+
+	function patchWebSocket() {
+	    window.WebSocket = SyncWebSocket;
 	}
 
 /***/ })
