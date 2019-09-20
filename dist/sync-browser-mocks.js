@@ -525,7 +525,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.mockWebSocket = mockWebSocket;
 	exports.patchWebSocket = patchWebSocket;
 
+	var OriginalWebSocket = window.WebSocket;
+
 	var mockWebSockets = [];
+	var websockets = [];
 
 	function mockWebSocket(_ref) {
 	    var uri = _ref.uri,
@@ -547,18 +550,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	            };
 	        },
 	        receive: function receive(_ref2) {
-	            var receiveData = _ref2.data,
-	                socket = _ref2.socket;
+	            var receiveData = _ref2.data;
 
 	            hasCalls = true;
 
 	            handler({
 	                data: receiveData,
 	                send: function send(sendData) {
-	                    if (socket.onmessage) {
-	                        socket.onmessage({
-	                            data: sendData
-	                        });
+	                    var _iteratorNormalCompletion = true;
+	                    var _didIteratorError = false;
+	                    var _iteratorError = undefined;
+
+	                    try {
+	                        for (var _iterator = websockets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                            var websocket = _step.value;
+
+	                            if (websocket.readyState === WebSocket.OPEN && websocket.onmessage) {
+	                                websocket.onmessage({
+	                                    data: sendData
+	                                });
+	                                return;
+	                            }
+	                        }
+	                    } catch (err) {
+	                        _didIteratorError = true;
+	                        _iteratorError = err;
+	                    } finally {
+	                        try {
+	                            if (!_iteratorNormalCompletion && _iterator['return']) {
+	                                _iterator['return']();
+	                            }
+	                        } finally {
+	                            if (_didIteratorError) {
+	                                throw _iteratorError;
+	                            }
+	                        }
 	                    }
 	                }
 	            });
@@ -593,15 +619,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var mock = mockWebSockets[i];
 
 	                if (mock.isListening(socketUri)) {
-	                    mock.receive({ data: data, socket: socket });
+	                    mock.receive({ data: data });
 	                    return;
 	                }
 	            }
 	        },
 	        close: function close() {
-	            socket.readyState === WebSocket.CLOSED;
+	            socket.readyState = WebSocket.CLOSED;
 	        }
 	    };
+
+	    websockets.push(socket);
 
 	    setTimeout(function () {
 	        if (socket.onopen) {
@@ -611,6 +639,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    return socket;
 	}
+
+	SyncWebSocket.OPEN = WebSocket.OPEN;
+	SyncWebSocket.CLOSED = WebSocket.CLOSED;
 
 	function patchWebSocket() {
 	    window.WebSocket = SyncWebSocket;
@@ -628,7 +659,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.mockWebSocket = mockWebSocket;
 	exports.patchWebSocket = patchWebSocket;
 
+	var OriginalWebSocket = window.WebSocket;
+
 	var mockWebSockets = [];
+	var websockets = [];
 
 	function mockWebSocket(_ref) {
 	    var uri = _ref.uri,
@@ -650,18 +684,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	            };
 	        },
 	        receive: function receive(_ref2) {
-	            var receiveData = _ref2.data,
-	                socket = _ref2.socket;
+	            var receiveData = _ref2.data;
 
 	            hasCalls = true;
 
 	            handler({
 	                data: receiveData,
 	                send: function send(sendData) {
-	                    if (socket.onmessage) {
-	                        socket.onmessage({
-	                            data: sendData
-	                        });
+	                    var _iteratorNormalCompletion = true;
+	                    var _didIteratorError = false;
+	                    var _iteratorError = undefined;
+
+	                    try {
+	                        for (var _iterator = websockets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                            var websocket = _step.value;
+
+	                            if (websocket.readyState === WebSocket.OPEN && websocket.onmessage) {
+	                                websocket.onmessage({
+	                                    data: sendData
+	                                });
+	                                return;
+	                            }
+	                        }
+	                    } catch (err) {
+	                        _didIteratorError = true;
+	                        _iteratorError = err;
+	                    } finally {
+	                        try {
+	                            if (!_iteratorNormalCompletion && _iterator['return']) {
+	                                _iterator['return']();
+	                            }
+	                        } finally {
+	                            if (_didIteratorError) {
+	                                throw _iteratorError;
+	                            }
+	                        }
 	                    }
 	                }
 	            });
@@ -696,15 +753,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var mock = mockWebSockets[i];
 
 	                if (mock.isListening(socketUri)) {
-	                    mock.receive({ data: data, socket: socket });
+	                    mock.receive({ data: data });
 	                    return;
 	                }
 	            }
 	        },
 	        close: function close() {
-	            socket.readyState === WebSocket.CLOSED;
+	            socket.readyState = WebSocket.CLOSED;
 	        }
 	    };
+
+	    websockets.push(socket);
 
 	    setTimeout(function () {
 	        if (socket.onopen) {
@@ -714,6 +773,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    return socket;
 	}
+
+	SyncWebSocket.OPEN = WebSocket.OPEN;
+	SyncWebSocket.CLOSED = WebSocket.CLOSED;
 
 	function patchWebSocket() {
 	    window.WebSocket = SyncWebSocket;
