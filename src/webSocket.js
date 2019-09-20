@@ -50,11 +50,10 @@ export function mockWebSocket({ uri, handler }) {
 }
 
 function SyncWebSocket(socketUri) {
-    let open = true;
-
     const socket = {
+        readyState: WebSocket.OPEN,
         send: (data) => {
-            if (!open) {
+            if (socket.readyState !== WebSocket.OPEN) {
                 throw new Error('Socket is closed');
             }
             
@@ -68,7 +67,7 @@ function SyncWebSocket(socketUri) {
             }
         },
         close: () => {
-            open = false;
+            socket.readyState === WebSocket.CLOSED;
         }
     };
 
