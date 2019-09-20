@@ -50,8 +50,14 @@ export function mockWebSocket({ uri, handler }) {
 }
 
 function SyncWebSocket(socketUri) {
+    let open = true;
+
     const socket = {
         send: (data) => {
+            if (!open) {
+                throw new Error('Socket is closed');
+            }
+            
             for (let i = (mockWebSockets.length - 1); i >= 0; i--) {
                 const mock = mockWebSockets[i];
 
@@ -60,6 +66,9 @@ function SyncWebSocket(socketUri) {
                     return;
                 }
             }
+        },
+        close: () => {
+            open = false;
         }
     };
 
