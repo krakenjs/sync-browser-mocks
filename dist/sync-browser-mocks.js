@@ -556,38 +556,41 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            handler({
 	                data: receiveData,
-	                send: function send(sendData) {
-	                    var _iteratorNormalCompletion = true;
-	                    var _didIteratorError = false;
-	                    var _iteratorError = undefined;
-
-	                    try {
-	                        for (var _iterator = websockets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	                            var websocket = _step.value;
-
-	                            if (websocket.readyState === WebSocket.OPEN && websocket.onmessage) {
-	                                websocket.onmessage({
-	                                    data: sendData
-	                                });
-	                                return;
-	                            }
-	                        }
-	                    } catch (err) {
-	                        _didIteratorError = true;
-	                        _iteratorError = err;
-	                    } finally {
-	                        try {
-	                            if (!_iteratorNormalCompletion && _iterator['return']) {
-	                                _iterator['return']();
-	                            }
-	                        } finally {
-	                            if (_didIteratorError) {
-	                                throw _iteratorError;
-	                            }
-	                        }
-	                    }
+	                respond: function respond(sendData) {
+	                    return mock.send(sendData);
 	                }
 	            });
+	        },
+	        send: function send(sendData) {
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
+
+	            try {
+	                for (var _iterator = websockets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var websocket = _step.value;
+
+	                    if (websocket.readyState === WebSocket.OPEN && websocket.onmessage) {
+	                        websocket.onmessage({
+	                            data: sendData
+	                        });
+	                        return;
+	                    }
+	                }
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator['return']) {
+	                        _iterator['return']();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
+	                }
+	            }
 	        },
 	        expect: function expect() {
 	            listening = true;
@@ -608,6 +611,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function SyncWebSocket(socketUri) {
+
+	    var getListeningMock = function getListeningMock() {
+	        for (var i = mockWebSockets.length - 1; i >= 0; i--) {
+	            var mock = mockWebSockets[i];
+
+	            if (mock.isListening(socketUri)) {
+	                return mock;
+	            }
+	        }
+	    };
+
 	    var socket = {
 	        readyState: WebSocket.OPEN,
 	        send: function send(data) {
@@ -615,13 +629,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                throw new Error('Socket is closed');
 	            }
 
-	            for (var i = mockWebSockets.length - 1; i >= 0; i--) {
-	                var mock = mockWebSockets[i];
-
-	                if (mock.isListening(socketUri)) {
-	                    mock.receive({ data: data });
-	                    return;
-	                }
+	            var mock = getListeningMock();
+	            if (mock) {
+	                mock.receive({ data: data });
+	                return;
 	            }
 	        },
 	        close: function close() {
@@ -629,16 +640,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (socket.onclose) {
 	                socket.onclose();
 	            }
+	        },
+	        get onopen() {
+	            return socket._onopen;
+	        },
+	        set onopen(value) {
+	            socket._onopen = value;
+	            if (getListeningMock()) {
+	                socket._onopen();
+	            }
+	        },
+	        get onerror() {
+	            return socket._onerror;
+	        },
+	        set onerror(value) {
+	            socket._onerror = value;
+	            if (!getListeningMock()) {
+	                socket._onerror(new Error('No socket server found'));
+	            }
+	        },
+	        get onclose() {
+	            return socket._onclose;
+	        },
+	        set onclose(value) {
+	            socket._onclose = value;
+	            if (!getListeningMock()) {
+	                socket._onclose();
+	            }
 	        }
 	    };
 
 	    websockets.push(socket);
-
-	    setTimeout(function () {
-	        if (socket.onopen) {
-	            socket.onopen();
-	        }
-	    });
 
 	    return socket;
 	}
@@ -693,38 +725,41 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            handler({
 	                data: receiveData,
-	                send: function send(sendData) {
-	                    var _iteratorNormalCompletion = true;
-	                    var _didIteratorError = false;
-	                    var _iteratorError = undefined;
-
-	                    try {
-	                        for (var _iterator = websockets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	                            var websocket = _step.value;
-
-	                            if (websocket.readyState === WebSocket.OPEN && websocket.onmessage) {
-	                                websocket.onmessage({
-	                                    data: sendData
-	                                });
-	                                return;
-	                            }
-	                        }
-	                    } catch (err) {
-	                        _didIteratorError = true;
-	                        _iteratorError = err;
-	                    } finally {
-	                        try {
-	                            if (!_iteratorNormalCompletion && _iterator['return']) {
-	                                _iterator['return']();
-	                            }
-	                        } finally {
-	                            if (_didIteratorError) {
-	                                throw _iteratorError;
-	                            }
-	                        }
-	                    }
+	                respond: function respond(sendData) {
+	                    return mock.send(sendData);
 	                }
 	            });
+	        },
+	        send: function send(sendData) {
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
+
+	            try {
+	                for (var _iterator = websockets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var websocket = _step.value;
+
+	                    if (websocket.readyState === WebSocket.OPEN && websocket.onmessage) {
+	                        websocket.onmessage({
+	                            data: sendData
+	                        });
+	                        return;
+	                    }
+	                }
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator['return']) {
+	                        _iterator['return']();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
+	                }
+	            }
 	        },
 	        expect: function expect() {
 	            listening = true;
@@ -745,6 +780,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function SyncWebSocket(socketUri) {
+
+	    var getListeningMock = function getListeningMock() {
+	        for (var i = mockWebSockets.length - 1; i >= 0; i--) {
+	            var mock = mockWebSockets[i];
+
+	            if (mock.isListening(socketUri)) {
+	                return mock;
+	            }
+	        }
+	    };
+
 	    var socket = {
 	        readyState: WebSocket.OPEN,
 	        send: function send(data) {
@@ -752,13 +798,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                throw new Error('Socket is closed');
 	            }
 
-	            for (var i = mockWebSockets.length - 1; i >= 0; i--) {
-	                var mock = mockWebSockets[i];
-
-	                if (mock.isListening(socketUri)) {
-	                    mock.receive({ data: data });
-	                    return;
-	                }
+	            var mock = getListeningMock();
+	            if (mock) {
+	                mock.receive({ data: data });
+	                return;
 	            }
 	        },
 	        close: function close() {
@@ -766,16 +809,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (socket.onclose) {
 	                socket.onclose();
 	            }
+	        },
+	        get onopen() {
+	            return socket._onopen;
+	        },
+	        set onopen(value) {
+	            socket._onopen = value;
+	            if (getListeningMock()) {
+	                socket._onopen();
+	            }
+	        },
+	        get onerror() {
+	            return socket._onerror;
+	        },
+	        set onerror(value) {
+	            socket._onerror = value;
+	            if (!getListeningMock()) {
+	                socket._onerror(new Error('No socket server found'));
+	            }
+	        },
+	        get onclose() {
+	            return socket._onclose;
+	        },
+	        set onclose(value) {
+	            socket._onclose = value;
+	            if (!getListeningMock()) {
+	                socket._onclose();
+	            }
 	        }
 	    };
 
 	    websockets.push(socket);
-
-	    setTimeout(function () {
-	        if (socket.onopen) {
-	            socket.onopen();
-	        }
-	    });
 
 	    return socket;
 	}
