@@ -582,11 +582,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function SyncWebSocket(socketUri) {
-	    var open = true;
-
 	    var socket = {
+	        readyState: WebSocket.OPEN,
 	        send: function send(data) {
-	            if (!open) {
+	            if (socket.readyState !== WebSocket.OPEN) {
 	                throw new Error('Socket is closed');
 	            }
 
@@ -600,7 +599,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        },
 	        close: function close() {
-	            open = false;
+	            socket.readyState === WebSocket.CLOSED;
 	        }
 	    };
 
@@ -686,11 +685,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function SyncWebSocket(socketUri) {
-	    var open = true;
-
 	    var socket = {
+	        readyState: WebSocket.OPEN,
 	        send: function send(data) {
-	            if (!open) {
+	            if (socket.readyState !== WebSocket.OPEN) {
 	                throw new Error('Socket is closed');
 	            }
 
@@ -704,7 +702,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        },
 	        close: function close() {
-	            open = false;
+	            socket.readyState === WebSocket.CLOSED;
 	        }
 	    };
 
