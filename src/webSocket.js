@@ -74,6 +74,9 @@ function SyncWebSocket(socketUri) {
         },
         close: () => {
             socket.readyState = WebSocket.CLOSED;
+            if (socket.onclose) {
+                socket.onclose();
+            }
         }
     };
 
