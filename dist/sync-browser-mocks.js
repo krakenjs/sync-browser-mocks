@@ -582,8 +582,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function SyncWebSocket(socketUri) {
+	    var open = true;
+
 	    var socket = {
 	        send: function send(data) {
+	            if (!open) {
+	                throw new Error('Socket is closed');
+	            }
+
 	            for (var i = mockWebSockets.length - 1; i >= 0; i--) {
 	                var mock = mockWebSockets[i];
 
@@ -592,6 +598,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return;
 	                }
 	            }
+	        },
+	        close: function close() {
+	            open = false;
 	        }
 	    };
 
@@ -677,8 +686,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function SyncWebSocket(socketUri) {
+	    var open = true;
+
 	    var socket = {
 	        send: function send(data) {
+	            if (!open) {
+	                throw new Error('Socket is closed');
+	            }
+
 	            for (var i = mockWebSockets.length - 1; i >= 0; i--) {
 	                var mock = mockWebSockets[i];
 
@@ -687,6 +702,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return;
 	                }
 	            }
+	        },
+	        close: function close() {
+	            open = false;
 	        }
 	    };
 
