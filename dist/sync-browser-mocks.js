@@ -626,6 +626,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        },
 	        close: function close() {
 	            socket.readyState = WebSocket.CLOSED;
+	            if (socket.onclose) {
+	                socket.onclose();
+	            }
 	        }
 	    };
 
@@ -760,6 +763,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        },
 	        close: function close() {
 	            socket.readyState = WebSocket.CLOSED;
+	            if (socket.onclose) {
+	                socket.onclose();
+	            }
 	        }
 	    };
 
