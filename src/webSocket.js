@@ -1,5 +1,8 @@
 
+const OriginalWebSocket = window.WebSocket;
+
 const mockWebSockets = [];
+const websockets = [];
 
 export function mockWebSocket({ uri, handler }) {
     let listening = false;
@@ -17,16 +20,19 @@ export function mockWebSocket({ uri, handler }) {
                 }
             };
         },
-        receive: ({ data: receiveData, socket }) => {
+        receive: ({ data: receiveData }) => {
             hasCalls = true;
 
             handler({
                 data: receiveData,
                 send: (sendData) => {
-                    if (socket.onmessage) {
-                        socket.onmessage({
-                            data: sendData
-                        });
+                    for (const websocket of websockets) {
+                        if (websocket.readyState === WebSocket.OPEN && websocket.onmessage) {
+                            websocket.onmessage({
+                                data: sendData
+                            });
+                            return;
+                        }
                     }
                 }
             });
@@ -61,15 +67,17 @@ function SyncWebSocket(socketUri) {
                 const mock = mockWebSockets[i];
 
                 if (mock.isListening(socketUri)) {
-                    mock.receive({ data, socket });
+                    mock.receive({ data });
                     return;
                 }
             }
         },
         close: () => {
-            socket.readyState === WebSocket.CLOSED;
+            socket.readyState = WebSocket.CLOSED;
         }
     };
+
+    websockets.push(socket);
 
     setTimeout(() => {
         if (socket.onopen) {
@@ -79,6 +87,9 @@ function SyncWebSocket(socketUri) {
 
     return socket;
 }
+
+SyncWebSocket.OPEN = WebSocket.OPEN;
+SyncWebSocket.CLOSED = WebSocket.CLOSED;
 
 export function patchWebSocket() {
     window.WebSocket = SyncWebSocket;
