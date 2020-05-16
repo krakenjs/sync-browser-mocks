@@ -1,3 +1,4 @@
+import { ZalgoPromise } from 'zalgo-promise';
 
 var endpoints = [];
 
@@ -184,24 +185,30 @@ SyncXMLHttpRequest.prototype = {
 
         console.debug('REQUEST', this.method, this.uri, data);
 
-        var response = this.mock.call({ data, query: this.query, headers: this._requestHeaders });
+        ZalgoPromise.try(() => {
+            return this.mock.call({ data, query: this.query, headers: this._requestHeaders });
+        }).then(response => {
+            return { response, status: this.mock.status };
+        }).catch(err => {
+            return { response: err.stack || err.toString, status: 500 };
+        }).then(({ response, status }) => {
+            this._respond(status, response);
 
-        this._respond(this.mock.status, response);
-
-        let callback;
-
-        let descriptor = {
-            get: () => {
-                return callback;
-            },
-            set: (value) => {
-                callback = value;
-                this._respond(this.mock.status, response);
-            }
-        };
-
-        Object.defineProperty(this, 'onreadystatechange', descriptor);
-        Object.defineProperty(this, 'onload', descriptor);
+            let callback;
+    
+            let descriptor = {
+                get: () => {
+                    return callback;
+                },
+                set: (value) => {
+                    callback = value;
+                    this._respond(this.mock.status, response);
+                }
+            };
+    
+            Object.defineProperty(this, 'onreadystatechange', descriptor);
+            Object.defineProperty(this, 'onload', descriptor);
+        });
     },
 
     _respond(status, response) {
