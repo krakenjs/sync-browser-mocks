@@ -1,6 +1,4 @@
 
-const OriginalWebSocket = window.WebSocket;
-
 const mockWebSockets = [];
 const websockets = [];
 
@@ -102,7 +100,7 @@ function SyncWebSocket(socketUri) {
         set onerror(value) {
             socket._onerror = value;
             if (!getListeningMock()) {
-                socket._onerror(new Error(`No socket server found`));
+                socket._onerror(new Error('No socket server found'));
             }
         },
         get onclose() {

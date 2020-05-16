@@ -22,7 +22,8 @@
     "window": true,
     "document": true,
     "Promise": false,
-    "performance": true
+    "performance": true,
+    "WebSocket": true
   },
 
   "fix": true,
