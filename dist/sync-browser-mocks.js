@@ -442,7 +442,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        console.debug('REQUEST', this.method, this.uri, data);
 
 	        _zalgoPromise.ZalgoPromise['try'](function () {
-	            return _this4.mock.call({ data: data, query: _this4.query, headers: _this4._requestHeaders });
+	            return _this4.mock.call({ uri: _this4.uri, method: _this4.method, data: data, query: _this4.query, headers: _this4._requestHeaders });
 	        }).then(function (response) {
 	            return { response: response, status: _this4.mock.status };
 	        })['catch'](function (err) {
