@@ -186,7 +186,7 @@ SyncXMLHttpRequest.prototype = {
         console.debug('REQUEST', this.method, this.uri, data);
 
         ZalgoPromise.try(() => {
-            return this.mock.call({ data, query: this.query, headers: this._requestHeaders });
+            return this.mock.call({ uri: this.uri, method: this.method, data, query: this.query, headers: this._requestHeaders });
         }).then(response => {
             return { response, status: this.mock.status };
         }).catch(err => {
