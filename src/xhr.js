@@ -10,7 +10,7 @@ export function $mockEndpoint(options) {
         options.uri = options.uri.replace(/\?/g, '\\?');
     }
 
-    this.status = options.status || 200;
+    this.status = options.status !== undefined ? options.status : 200;
 
     this.rawMethod = options.method.toString();
     this.rawUri = options.uri.toString();
@@ -221,11 +221,9 @@ SyncXMLHttpRequest.prototype = {
         this.response = this.responseText = JSON.stringify(response);
         this.readyState = 4;
 
-        if (this._eventHandlers.load) {
-            for (let handler of this._eventHandlers.load) {
-                handler.call(this);
-            }
-        }
+        for (let handler of Object.values(this._eventHandlers).flat()) {
+            handler.call(this);
+        };
 
         let callback = this.onreadystatechange || this.onload;
 
