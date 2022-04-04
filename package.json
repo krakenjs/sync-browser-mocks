@@ -1,6 +1,6 @@
 {
-  "name": "sync-browser-mocks",
-  "version": "2.0.8",
+  "name": "@krakenjs/sync-browser-mocks",
+  "version": "3.0.0",
   "description": "Synchronous browser mock shims.",
   "main": "index.js",
   "scripts": {
@@ -45,5 +45,7 @@
     "gulp-webpack": "^1.5.0",
     "webpack": "^1.13.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@krakenjs/zalgo-promise": "^2.0.1"
+  }
 }

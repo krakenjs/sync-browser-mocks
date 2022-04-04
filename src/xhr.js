@@ -1,4 +1,4 @@
-import { ZalgoPromise } from 'zalgo-promise';
+import { ZalgoPromise } from '@krakenjs/zalgo-promise';
 
 var endpoints = [];
 
@@ -195,7 +195,7 @@ SyncXMLHttpRequest.prototype = {
             this._respond(status, response);
 
             let callback;
-    
+
             let descriptor = {
                 get: () => {
                     return callback;
@@ -205,7 +205,7 @@ SyncXMLHttpRequest.prototype = {
                     this._respond(this.mock.status, response);
                 }
             };
-    
+
             Object.defineProperty(this, 'onreadystatechange', descriptor);
             Object.defineProperty(this, 'onload', descriptor);
         });
