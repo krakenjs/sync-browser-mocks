@@ -1,5 +1,4 @@
-Sync Browser Mocks
-------------------
+## Sync Browser Mocks
 
 Synchronous browser mocks for common async browser apis: `window.postMessage`, `window.Promise`, `window.setTimeout`, `window.setInterval`, `window.XmlHttpRequest`
 
@@ -12,27 +11,27 @@ Inspired by [ngMock](https://docs.angularjs.org/api/ngMock)'s `$timeout`, `$inte
 ### Usage
 
 ```javascript
-require('sync-browser-mocks').patchAll();
+require("sync-browser-mocks").patchAll();
 ```
 
 ### Promise
 
 ```javascript
-require('sync-browser-mocks').patchPromise();
+require("sync-browser-mocks").patchPromise();
 ```
 
 No additional changes are needed to use synchronous Promises: as soon as your promise is resolved, rather than waiting for the next tick, your `.then()` and `.catch()` handlers will be immediately invoked.
 
 ```javascript
-var x = new Promise(function(resolve) {
-    resolve('foobar');
+var x = new Promise(function (resolve) {
+  resolve("foobar");
 });
 
-x.then(function() {
-    console.log('This will be logged first');
+x.then(function () {
+  console.log("This will be logged first");
 });
 
-console.log('This will be logged second');
+console.log("This will be logged second");
 ```
 
 Obviously, this relies on your code not containing any race conditions where you explicitly rely on `.then()` being called on the next tick.
@@ -41,99 +40,100 @@ These situations might break if you're using synchronous promises -- but that's 
 ### setTimeout
 
 ```javascript
-require('sync-browser-mocks').patchSetTimeout();
+require("sync-browser-mocks").patchSetTimeout();
 ```
 
 Any time you want to flush any pending timeout functions, you will need to call `setTimeout.flush()`. For example:
 
 ```javascript
-setTimeout(function() {
-    console.log('This will be logged second');
+setTimeout(function () {
+  console.log("This will be logged second");
 }, 200);
 
-setTimeout(function() {
-    console.log('This will be logged first');
+setTimeout(function () {
+  console.log("This will be logged first");
 }, 100);
 
 setTimeout.flush();
 ```
 
-
 ### setInterval
 
 ```javascript
-require('sync-browser-mocks').patchSetInterval();
+require("sync-browser-mocks").patchSetInterval();
 ```
 
 Any time you want to flush any pending interval functions, you will need to call `setInterval.cycle()`. For example:
 
 ```javascript
-setInterval(function() {
-    console.log('This will be logged second');
+setInterval(function () {
+  console.log("This will be logged second");
 }, 200);
 
-setInterval(function() {
-    console.log('This will be logged first');
+setInterval(function () {
+  console.log("This will be logged first");
 }, 100);
 
 setInterval.cycle();
 setInterval.cycle();
 ```
 
-
 ### XmlHttpRequest
 
 ```javascript
-require('sync-browser-mocks').patchXmlHttpRequest();
+require("sync-browser-mocks").patchXmlHttpRequest();
 ```
 
 This module sets up a mock http backend you can use to handle incoming ajax requests:
 
 ```javascript
-var $mockEndpoint = require('sync-browser-mocks').$mockEndpoint;
+var $mockEndpoint = require("sync-browser-mocks").$mockEndpoint;
 
-$mockEndpoint.register({
-    method: 'GET',
-    uri: '/api/user/.+',
+$mockEndpoint
+  .register({
+    method: "GET",
+    uri: "/api/user/.+",
     data: {
-        name: 'Zippy the Pinhead'
-    }
-}).listen();
+      name: "Zippy the Pinhead",
+    },
+  })
+  .listen();
 ```
 
 Dynamic handler:
 
 ```javascript
-$mockEndpoint.register({
-    method: 'GET',
-    uri: '/api/user/.+',
-    handler: function() {
-        return {
-            name: 'Zippy the Pinhead'
-        };
-    }
-}).listen();
+$mockEndpoint
+  .register({
+    method: "GET",
+    uri: "/api/user/.+",
+    handler: function () {
+      return {
+        name: "Zippy the Pinhead",
+      };
+    },
+  })
+  .listen();
 ```
 
 Expecting calls in a test:
 
 ```javascript
-var $mockEndpoint = require('sync-browser-mocks').$mockEndpoint;
+var $mockEndpoint = require("sync-browser-mocks").$mockEndpoint;
 
 var myListener = $mockEndpoint.register({
-    method: 'GET',
-    uri: '/api/user/.+',
-    data: {
-        name: 'Zippy the Pinhead'
-    }
+  method: "GET",
+  uri: "/api/user/.+",
+  data: {
+    name: "Zippy the Pinhead",
+  },
 });
 
-it('should correctly call /api/user', function() {
+it("should correctly call /api/user", function () {
+  myListener.expectCalls();
 
-    myListener.expectCalls();
-    
-    // Run some code which would call the api
+  // Run some code which would call the api
 
-    myListener.done(); // This will throw if the api was not called
+  myListener.done(); // This will throw if the api was not called
 });
 ```

@@ -1,47 +1,45 @@
 <script src="dist/sync-browser-mocks.js"></script>
 
 <script>
-    syncBrowserMocks.patchAll();
+  syncBrowserMocks.patchAll();
 
+  // Timeout
 
-    // Timeout
+  setTimeout(function () {
+    console.log("timeout 20000");
+  }, 20000);
 
-    setTimeout(function() {
-        console.log('timeout 20000');
-    }, 20000);
+  setTimeout(function () {
+    console.log("timeout 10000");
 
-    setTimeout(function() {
-        console.log('timeout 10000');
-
-        setTimeout(function() {
-            console.log('timeout 15000');
-        }, 5000);
-    }, 10000);
-
-    setTimeout(function() {
-        console.log('timeout 30000');
-    }, 30000);
-
-    setTimeout(function() {
-        console.log('timeout 0');
-    }, 0);
-
-    setTimeout(function() {
-        console.log('timeout 0 #2');
-    }, 0);
-
-    setTimeout.flush();
-
-
-    // Interval
-
-    setInterval(function() {
-        console.log('interval 1');
+    setTimeout(function () {
+      console.log("timeout 15000");
     }, 5000);
+  }, 10000);
 
-    setInterval(function() {
-        console.log('interval 2');
-    }, 15000);
+  setTimeout(function () {
+    console.log("timeout 30000");
+  }, 30000);
 
-    setInterval.cycle();
+  setTimeout(function () {
+    console.log("timeout 0");
+  }, 0);
+
+  setTimeout(function () {
+    console.log("timeout 0 #2");
+  }, 0);
+
+  setTimeout.flush();
+
+  // Interval
+
+  setInterval(function () {
+    console.log("interval 1");
+  }, 5000);
+
+  setInterval(function () {
+    console.log("interval 2");
+  }, 15000);
+
+  setInterval.cycle();
 </script>

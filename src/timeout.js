@@ -1,126 +1,120 @@
+/* @flow */
+const timeoutTasks = [];
 
-let timeoutTasks = [];
-
-let windowSetTimeout = window.setTimeout;
-let windowClearTimeout = window.clearTimeout;
+const windowSetTimeout = window.setTimeout;
+const windowClearTimeout = window.clearTimeout;
 
 let timeoutCount = 0;
 
-let LESSER = -1;
-let GREATER = 1;
-
+const LESSER = -1;
+const GREATER = 1;
 
 function findIndex(array, method) {
+  if (!array) {
+    return;
+  }
 
-    if (!array) {
-        return;
+  for (let i = 0; i < array.length; i++) {
+    if (method(array[i])) {
+      return i;
     }
-
-    for (let i = 0; i < array.length; i++) {
-        if (method(array[i])) {
-            return i;
-        }
-    }
+  }
 }
 
 export function syncSetTimeout(method, time) {
+  time = time || 0;
 
-    time = time || 0;
+  const id = windowSetTimeout(() => {
+    // eslint-disable-next-line no-use-before-define
+    timeoutTasks.splice(timeoutTasks.indexOf(task), 1);
+    method();
+  }, time);
 
-    let id = windowSetTimeout(function() {
-        timeoutTasks.splice(timeoutTasks.indexOf(task), 1);
-        method();
-    }, time);
+  const task = {
+    id,
+    time,
+    method,
+    count: timeoutCount++,
+  };
 
-    let task = {
-        id,
-        time,
-        method,
-        count: timeoutCount++
-    };
+  timeoutTasks.push(task);
 
-    timeoutTasks.push(task);
-
-    return id;
+  return id;
 }
 
 export function syncClearTimeout(id) {
-    if (id === undefined) {
-        return;
-    }
+  if (id === undefined) {
+    return;
+  }
 
-    windowClearTimeout(id);
+  windowClearTimeout(id);
 
-    var index = findIndex(timeoutTasks, task => task.id === id);
-    timeoutTasks.splice(index, 1);
+  const index = findIndex(timeoutTasks, (task) => task.id === id);
+  timeoutTasks.splice(index, 1);
 }
 
-syncSetTimeout.flush = function() {
-
-    while (timeoutTasks.length) {
-        timeoutTasks.sort(function(a, b) {
-            if (a.time === b.time) {
-                return a.count < b.count ? LESSER : GREATER;
-            }
-            return a.time < b.time ? LESSER : GREATER;
-        });
-        let task = timeoutTasks.shift();
-        task.method();
-        clearInterval(task.id);
-    }
+syncSetTimeout.flush = function () {
+  while (timeoutTasks.length) {
+    timeoutTasks.sort((a, b) => {
+      if (a.time === b.time) {
+        return a.count < b.count ? LESSER : GREATER;
+      }
+      return a.time < b.time ? LESSER : GREATER;
+    });
+    const task = timeoutTasks.shift();
+    task.method();
+    clearInterval(task.id);
+  }
 };
 
-
-let intervalTasks = [];
-let windowSetInterval = window.setInterval;
-let windowClearInterval = window.clearInterval;
+const intervalTasks = [];
+const windowSetInterval = window.setInterval;
+const windowClearInterval = window.clearInterval;
 let intervalCount = 0;
 
 export function syncSetInterval(method, time) {
+  const id = windowSetInterval(method, time);
 
-    let id = windowSetInterval(method, time);
+  const task = {
+    id,
+    time,
+    method,
+    count: intervalCount++,
+  };
 
-    let task = {
-        id,
-        time,
-        method,
-        count: intervalCount++
-    };
+  intervalTasks.push(task);
 
-    intervalTasks.push(task);
-
-    return id;
+  return id;
 }
 
 export function syncClearInterval(id) {
-    if (id === undefined) {
-        return;
-    }
+  if (id === undefined) {
+    return;
+  }
 
-    windowClearInterval(id);
+  windowClearInterval(id);
 
-    var index = findIndex(intervalTasks, task => task.id === id);
-    intervalTasks.splice(index, 1);
+  const index = findIndex(intervalTasks, (task) => task.id === id);
+  intervalTasks.splice(index, 1);
 }
 
-syncSetInterval.cycle = function() {
+syncSetInterval.cycle = function () {
+  const length = intervalTasks.length;
 
-    var length = intervalTasks.length;
-
-    for (var i = 0; i < length; i++) {
-        let task = intervalTasks[i];
-        task.method();
-        windowClearInterval(task.id);
-        setInterval(task.method, task.time);
-    }
-} // eslint-disable-line semi
+  for (let i = 0; i < length; i++) {
+    const task = intervalTasks[i];
+    task.method();
+    windowClearInterval(task.id);
+    setInterval(task.method, task.time);
+  }
+};
 
 export function patchSetTimeout() {
-    window.setTimeout = syncSetTimeout;
-    window.clearTimeout = syncClearTimeout;
+  window.setTimeout = syncSetTimeout;
+  window.clearTimeout = syncClearTimeout;
 }
 
 export function patchSetInterval() {
-    window.setInterval = syncSetInterval;
-    window.clearInterval = syncClearInterval;
+  window.setInterval = syncSetInterval;
+  window.clearInterval = syncClearInterval;
 }
